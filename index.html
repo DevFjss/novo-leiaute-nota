@@ -22,7 +22,7 @@
         .main { padding: 2rem; max-width: 100%; margin: 0 auto; overflow-x: auto; }
         .card { background: white; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #eef2f8; flex-wrap: wrap; gap: 0.5rem; }
-        .search-form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+        .search-form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
         .form-group { flex: 2; min-width: 250px; }
         .form-group label { display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #5c7b9c; margin-bottom: 0.3rem; }
         .form-group input { width: 100%; padding: 0.7rem 1rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; }
@@ -51,6 +51,9 @@
         .info-message { background: #e6f4ff; padding: 0.5rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.8rem; }
         td:first-child, td:nth-child(2), td:nth-child(6) { text-align: left; }
         td:nth-child(3), td:nth-child(4), td:nth-child(5) { text-align: center; }
+        .search-with-button { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+        .search-with-button .form-group { flex: 2; min-width: 250px; }
+        .search-with-button button { margin-bottom: 0; }
         
         @media print {
             body { background: white; }
@@ -83,15 +86,18 @@
             <div class="card">
                 <div class="card-header"><h3><i class="fas fa-filter"></i> Filtrar Escolas</h3></div>
                 <div class="search-form">
-                    <div class="form-group">
-                        <label>🔍 VALOR PARA PESQUISAR (NTE, Município ou Código SEC)</label>
-                        <input type="text" id="searchValue" placeholder="Digite NTE, Município ou Código SEC..." autocomplete="off">
+                    <div class="search-with-button">
+                        <div class="form-group">
+                            <label>🔍 VALOR PARA PESQUISAR (NTE, Município ou Código SEC)</label>
+                            <input type="text" id="searchValue" placeholder="Digite NTE, Município ou Código SEC..." autocomplete="off">
+                        </div>
+                        <button class="btn-success" id="loadDataBtn"><i class="fas fa-download"></i> Carregar Dados</button>
+                        <button class="btn-primary" id="exportToGerarBtn"><i class="fas fa-arrow-right"></i> Enviar Selecionados</button>
                     </div>
-                    <button class="btn-success" id="loadDataBtn"><i class="fas fa-download"></i> Carregar Dados</button>
                 </div>
                 <div class="info-message" style="margin-top: 1rem;">
                     <i class="fas fa-info-circle"></i> 
-                    <strong>Filtro automático:</strong> Digite na caixa acima para filtrar por NTE, Município ou Código SEC<br>
+                    <strong>Filtro automático:</strong> Digite na caixa acima para filtrar por NTE (exato), Município (contém) ou Código SEC (contém)<br>
                     <strong>Selecione as escolas:</strong> Marque os checkboxes e use "Enviar Selecionados" para levar à aba Gerar Valor
                 </div>
             </div>
@@ -99,9 +105,6 @@
             <div class="card">
                 <div class="card-header"><h3><i class="fas fa-table-list"></i> Lista de Escolas</h3><span class="badge" id="resultCount">0 registros</span></div>
                 <div id="resultsTable"><div class="empty-state"><i class="fas fa-cloud-download-alt" style="font-size: 3rem;"></i><p>Carregando lista completa de escolas...</p></div></div>
-                <div style="margin-top: 1rem; text-align: right;">
-                    <button class="btn-primary" id="exportToGerarBtn"><i class="fas fa-arrow-right"></i> Enviar Selecionados para Gerar Valor</button>
-                </div>
             </div>
         </div>
 
@@ -340,48 +343,53 @@
             return result;
         }
         
-        // Filtro automático: busca em NTE, Município e Código SEC
+        // Filtro automático: NTE = busca EXATA, Município = CONTÉM, Código SEC = CONTÉM
         function autoFiltro() {
             if (escolasData.length === 0) return;
-            const termo = document.getElementById('searchValue').value.trim().toLowerCase();
+            const termo = document.getElementById('searchValue').value.trim();
             
             let resultados;
             if (termo === '') {
                 resultados = escolasData;
-            } else {
-                resultados = escolasData.filter(escola => 
-                    escola.nte.toLowerCase().includes(termo) ||
-                    escola.municipio.toLowerCase().includes(termo) ||
-                    escola.codigoSec.toLowerCase().includes(termo)
-                );
-            }
-            
-            // Atualiza variáveis globais para o resumo
-            if (resultados.length > 0 && termo !== '') {
-                // Tenta determinar o tipo baseado no que foi encontrado
-                const primeira = resultados[0];
-                if (primeira.nte.toLowerCase() === termo) {
-                    tipoBuscaAtual = 'NTE';
-                    valorBuscaAtual = primeira.nte;
-                } else if (primeira.municipio.toLowerCase() === termo) {
-                    tipoBuscaAtual = 'MUNICIPIO';
-                    valorBuscaAtual = primeira.municipio;
-                } else if (primeira.codigoSec.toLowerCase() === termo) {
-                    tipoBuscaAtual = 'ESCOLA';
-                    valorBuscaAtual = primeira.codigoSec;
-                } else if (resultados.some(e => e.nte.toLowerCase().includes(termo))) {
-                    tipoBuscaAtual = 'NTE';
-                    valorBuscaAtual = resultados.find(e => e.nte.toLowerCase().includes(termo))?.nte || termo;
-                } else if (resultados.some(e => e.municipio.toLowerCase().includes(termo))) {
-                    tipoBuscaAtual = 'MUNICIPIO';
-                    valorBuscaAtual = resultados.find(e => e.municipio.toLowerCase().includes(termo))?.municipio || termo;
-                } else {
-                    tipoBuscaAtual = 'ESCOLA';
-                    valorBuscaAtual = termo;
-                }
-            } else if (termo === '') {
                 tipoBuscaAtual = '';
                 valorBuscaAtual = '';
+            } else {
+                // Primeiro tenta busca exata por NTE (comparação numérica)
+                const nteExato = escolasData.filter(escola => escola.nte === termo);
+                
+                if (nteExato.length > 0) {
+                    resultados = nteExato;
+                    tipoBuscaAtual = 'NTE';
+                    valorBuscaAtual = termo;
+                } else {
+                    // Se não for NTE exato, busca por Município (contém) ou Código SEC (contém)
+                    const termoLower = termo.toLowerCase();
+                    resultados = escolasData.filter(escola => 
+                        escola.municipio.toLowerCase().includes(termoLower) ||
+                        escola.codigoSec.toLowerCase().includes(termoLower)
+                    );
+                    
+                    if (resultados.length > 0) {
+                        // Determina o tipo baseado no primeiro resultado
+                        if (resultados[0].municipio.toLowerCase() === termoLower) {
+                            tipoBuscaAtual = 'MUNICIPIO';
+                            valorBuscaAtual = resultados[0].municipio;
+                        } else if (resultados[0].codigoSec.toLowerCase() === termoLower) {
+                            tipoBuscaAtual = 'ESCOLA';
+                            valorBuscaAtual = termo;
+                        } else if (resultados.some(e => e.municipio.toLowerCase().includes(termoLower))) {
+                            tipoBuscaAtual = 'MUNICIPIO';
+                            valorBuscaAtual = termo;
+                        } else {
+                            tipoBuscaAtual = 'ESCOLA';
+                            valorBuscaAtual = termo;
+                        }
+                    } else {
+                        resultados = [];
+                        tipoBuscaAtual = '';
+                        valorBuscaAtual = '';
+                    }
+                }
             }
             
             mostrarResultados(resultados);
