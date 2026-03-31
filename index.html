@@ -343,6 +343,12 @@
             return result;
         }
         
+        // Função para normalizar texto (maiúsculo e sem acentos para busca)
+        function normalizarTexto(texto) {
+            if (!texto) return '';
+            return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+        }
+        
         // Filtro automático: NTE = busca EXATA, Município = CONTÉM, Código SEC = CONTÉM
         function autoFiltro() {
             if (escolasData.length === 0) return;
@@ -354,6 +360,8 @@
                 tipoBuscaAtual = '';
                 valorBuscaAtual = '';
             } else {
+                const termoNormalizado = normalizarTexto(termo);
+                
                 // Primeiro tenta busca exata por NTE (comparação numérica)
                 const nteExato = escolasData.filter(escola => escola.nte === termo);
                 
@@ -362,27 +370,41 @@
                     tipoBuscaAtual = 'NTE';
                     valorBuscaAtual = termo;
                 } else {
-                    // Se não for NTE exato, busca por Município (contém) ou Código SEC (contém)
-                    const termoLower = termo.toLowerCase();
-                    resultados = escolasData.filter(escola => 
-                        escola.municipio.toLowerCase().includes(termoLower) ||
-                        escola.codigoSec.toLowerCase().includes(termoLower)
-                    );
+                    // Busca por Município (contém) ou Código SEC (contém)
+                    resultados = escolasData.filter(escola => {
+                        const municipioNormalizado = normalizarTexto(escola.municipio);
+                        const codigoSecNormalizado = normalizarTexto(escola.codigoSec);
+                        return municipioNormalizado.includes(termoNormalizado) ||
+                               codigoSecNormalizado.includes(termoNormalizado);
+                    });
                     
                     if (resultados.length > 0) {
                         // Determina o tipo baseado no primeiro resultado
-                        if (resultados[0].municipio.toLowerCase() === termoLower) {
+                        // Se o termo corresponde ao início do município ou contém, usa o nome completo do município em maiúsculo
+                        const primeiroMunicipio = resultados[0].municipio;
+                        const primeiroMunicipioNormalizado = normalizarTexto(primeiroMunicipio);
+                        
+                        if (primeiroMunicipioNormalizado.includes(termoNormalizado)) {
                             tipoBuscaAtual = 'MUNICIPIO';
-                            valorBuscaAtual = resultados[0].municipio;
-                        } else if (resultados[0].codigoSec.toLowerCase() === termoLower) {
-                            tipoBuscaAtual = 'ESCOLA';
-                            valorBuscaAtual = termo;
-                        } else if (resultados.some(e => e.municipio.toLowerCase().includes(termoLower))) {
-                            tipoBuscaAtual = 'MUNICIPIO';
-                            valorBuscaAtual = termo;
+                            // Guarda o nome completo do município em maiúsculo (como está na planilha)
+                            valorBuscaAtual = primeiroMunicipio.toUpperCase();
                         } else {
                             tipoBuscaAtual = 'ESCOLA';
                             valorBuscaAtual = termo;
+                        }
+                        
+                        // Se houver mais de um resultado e o termo corresponder a um município específico, tenta encontrar o nome exato
+                        if (tipoBuscaAtual === 'MUNICIPIO') {
+                            // Tenta encontrar um município que corresponde exatamente ao termo (ignorando acentos e case)
+                            const municipioExato = resultados.find(escola => 
+                                normalizarTexto(escola.municipio) === termoNormalizado
+                            );
+                            if (municipioExato) {
+                                valorBuscaAtual = municipioExato.municipio.toUpperCase();
+                            } else {
+                                // Usa o primeiro resultado como referência
+                                valorBuscaAtual = resultados[0].municipio.toUpperCase();
+                            }
                         }
                     } else {
                         resultados = [];
@@ -563,7 +585,7 @@
             } else if (tipoBuscaAtual === 'ESCOLA') {
                 identificador = 'SEC ' + valorBuscaAtual;
             } else {
-                identificador = 'ESTADO';
+                identificador = 'Seleção Manual';
                 tipoBuscaAtual = 'MANUAL';
                 valorBuscaAtual = 'manual';
             }
@@ -617,7 +639,7 @@
             html += '<th rowspan="3" style="background: #edd5be; vertical-align: middle;">REPASSE ESCOLARES</th>';
             html += '<th colspan="4" style="background: #a5d0e6;">MANUTENÇÃO</th>';
             html += '<th colspan="8" style="background: #43fa8f;">ALIMENTAÇÃO</th>';
-            html += '</tr>';
+            html += '<tr>';
             html += '<tr style="background: #43fa8f; color: white;">';
             html += '<th rowspan="2">2023</th><th rowspan="2">2024</th><th rowspan="2">2025</th><th rowspan="2">2026</th>';
             html += '<th colspan="2">2023</th><th colspan="2">2024</th><th colspan="2">2025</th><th colspan="2">2026</th>';
