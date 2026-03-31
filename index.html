@@ -520,10 +520,10 @@
                     html += '<td class="valor-monetario">' + formatarValorBR(valoresAlimentacao[ano].estadual[escola.codigoSec] || 0) + '</td>';
                 }
                 
-            
+            }
             html += '</tbody>}</div>';
             container.innerHTML = html;
-        }
+      
         
         function calcularTotaisEscolas(escolas) {
             let faed = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
