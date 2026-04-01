@@ -37,7 +37,7 @@
         .btn-info { background: #3b82f6; color: white; }
         .btn-info:hover { background: #2563eb; }
         .table-wrapper { overflow-x: auto; margin-top: 1rem; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.7rem; min-width: 1100px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7rem; min-width: 1200px; }
         th, td { padding: 0.5rem 0.5rem; border: 1px solid #d1d5db; text-align: center; vertical-align: middle; }
         th { background: #9ca3af; color: #000; font-weight: 700; font-size: 0.7rem; }
         .total-row { background: #e5e7eb; font-weight: bold; }
@@ -49,9 +49,9 @@
         .selected-row { background: #e6f4ff; }
         .checkbox-col { width: 40px; text-align: center; }
         .valor-monetario { font-family: 'Courier New', monospace; font-weight: 500; text-align: right; padding-right: 0.8rem; }
-        .report-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 1rem; }
+        .report-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 1rem; flex-wrap: wrap; }
         .info-message { background: #e6f4ff; padding: 0.5rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.8rem; }
-        td:first-child, td:nth-child(2), td:nth-child(6) { text-align: left; }
+        td:first-child, td:nth-child(2), td:nth-child(7) { text-align: left; }
         .search-with-button { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
         .search-with-button .form-group { flex: 2; min-width: 300px; }
         .search-with-button button { margin-bottom: 0; }
@@ -160,6 +160,27 @@
             margin-right: 8px;
         }
         
+        /* Checkbox na tabela de resumo */
+        .resumo-checkbox-col {
+            width: 40px;
+            text-align: center;
+            background: #f8fafc;
+        }
+        .resumo-checkbox-col input {
+            transform: scale(1.1);
+            cursor: pointer;
+        }
+        .delete-selected-btn {
+            background: #dc2626;
+            color: white;
+        }
+        .delete-selected-btn:hover {
+            background: #b91c1c;
+        }
+        .select-all-resumo {
+            margin-right: 10px;
+        }
+        
         @media print {
             body { background: white; }
             .header, .tabs, .action-buttons, .report-actions, .card-header button, .btn, .search-form, .info-message, .valor-cards-container { display: none !important; }
@@ -168,6 +189,7 @@
             table { font-size: 9pt; border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid #000; padding: 4px; }
             .valor-monetario { text-align: right; }
+            .resumo-checkbox-col { display: none; }
         }
     </style>
 </head>
@@ -215,7 +237,6 @@
         </div>
 
         <div id="gerarTab" style="display: none;">
-            <!-- CARDS DE SOMA DE VALORES -->
             <div class="valor-cards-container">
                 <div class="valor-card faed-card">
                     <div class="card-label">
@@ -255,15 +276,22 @@
             <div class="report-actions">
                 <button class="btn-primary" id="exportPDFBtn"><i class="fas fa-file-pdf"></i> Exportar PDF (Resumo)</button>
                 <button class="btn-success" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Exportar Excel (Resumo)</button>
-                <button class="btn-danger" id="limparResumoBtn"><i class="fas fa-trash"></i> Limpar Resumo</button>
+                <button class="btn-danger delete-selected-btn" id="deleteSelectedResumoBtn"><i class="fas fa-trash-alt"></i> Excluir Selecionados</button>
+                <button class="btn-danger" id="limparResumoBtn"><i class="fas fa-trash"></i> Limpar Todo Resumo</button>
             </div>
             <div class="card">
-                <div class="card-header"><h3><i class="fas fa-chart-bar"></i> Resumo Consolidado</h3></div>
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar"></i> Resumo Consolidado</h3>
+                    <div class="select-all-resumo">
+                        <label style="font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="selectAllResumoCheckbox"> Selecionar Todos
+                        </label>
+                    </div>
+                </div>
                 <div id="resumoConsolidado"><div class="empty-state"><p>Pesquise por NTE ou Município, gere os valores e clique em "Enviar para Resumo"</p></div></div>
             </div>
         </div>
 
-        <!-- NOVA ABA: LINKS ÚTEIS -->
         <div id="linksTab" style="display: none;">
             <div class="card">
                 <div class="card-header">
@@ -591,26 +619,21 @@
                 return;
             }
             
-            let html = '<div class="table-wrapper"><table>';
-            html += '<thead><tr>';
+            let html = '<div class="table-wrapper">\n<table>\n<thead>\n<tr>';
             html += '<th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox"></th>';
-            html += '<th>NTE</th>';
-            html += '<th>Município</th>';
-            html += '<th>Código SEC</th>';
-            html += '<th>Código INEP</th>';
-            html += '<th>Unidade Escolar</th>';
+            html += '<th>NTE</th><th>Município</th><th>Código SEC</th><th>Código INEP</th><th>Unidade Escolar</th>';
             html += '</tr></thead><tbody>';
             
             for (const escola of resultados) {
                 const isSelected = escolasSelecionadas.some(s => s.codigoSec === escola.codigoSec);
-                html += '<tr class="' + (isSelected ? 'selected-row' : '') + '">';
-                html += '<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="' + escola.codigoSec + '" ' + (isSelected ? 'checked' : '') + '></td>';
-                html += '<td><strong>' + (escola.nte || '-') + '</strong></td>';
-                html += '<td>' + (escola.municipio || '-') + '</td>';
-                html += '<td>' + (escola.codigoSec || '-') + '</td>';
-                html += '<td>' + (escola.codigoInep || '-') + '</td>';
-                html += '<td style="text-align:left">' + (escola.unidadeEscolar || '-') + '</td>';
-                html += '</tr>';
+                html += `<tr class="${isSelected ? 'selected-row' : ''}">`;
+                html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}></td>`;
+                html += `<td><strong>${escola.nte || '-'}</strong></td>`;
+                html += `<td>${escola.municipio || '-'}</td>`;
+                html += `<td>${escola.codigoSec || '-'}</td>`;
+                html += `<td>${escola.codigoInep || '-'}</td>`;
+                html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}</td>`;
+                html += `</tr>`;
             }
             
             html += '</tbody></table></div>';
@@ -685,8 +708,7 @@
                 return; 
             }
             
-            let html = '<div class="table-wrapper"><table>';
-            html += '<thead>';
+            let html = '<div class="table-wrapper">\n<table>\n<thead>';
             html += '<tr style="background: #9ca3af;"><th>NTE</th><th>Município</th><th>Código SEC</th><th>Código INEP</th><th>Unidade Escolar</th>';
             html += '<th colspan="4">FAED Manutenção</th><th colspan="8">PNAE - FAED Alimentação</th></tr>';
             html += '<tr style="background: #6b7280;"><th></th><th></th><th></th><th></th><th></th>';
@@ -697,17 +719,17 @@
             
             for (const escola of escolasSelecionadas) {
                 html += '<tr>';
-                html += '<td>' + (escola.nte || '-') + '</td>';
-                html += '<td>' + (escola.municipio || '-') + '</td>';
-                html += '<td>' + (escola.codigoSec || '-') + '</td>';
-                html += '<td>' + (escola.codigoInep || '-') + '</td>';
-                html += '<td style="text-align:left">' + (escola.unidadeEscolar || '-') + '</td>';
+                html += `<td>${escola.nte || '-'}</td>`;
+                html += `<td>${escola.municipio || '-'}</td>`;
+                html += `<td>${escola.codigoSec || '-'}</td>`;
+                html += `<td>${escola.codigoInep || '-'}</td>`;
+                html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}</td>`;
                 for (let ano of [2023, 2024, 2025, 2026]) {
-                    html += '<td class="valor-monetario">' + formatarValorBR(valoresFAED[ano][escola.codigoSec] || 0) + '</td>';
+                    html += `<td class="valor-monetario">${formatarValorBR(valoresFAED[ano][escola.codigoSec] || 0)}</td>`;
                 }
                 for (let ano of [2023, 2024, 2025, 2026]) {
-                    html += '<td class="valor-monetario">' + formatarValorBR(valoresAlimentacao[ano].federal[escola.codigoSec] || 0) + '</td>';
-                    html += '<td class="valor-monetario">' + formatarValorBR(valoresAlimentacao[ano].estadual[escola.codigoSec] || 0) + '</td>';
+                    html += `<td class="valor-monetario">${formatarValorBR(valoresAlimentacao[ano].federal[escola.codigoSec] || 0)}</td>`;
+                    html += `<td class="valor-monetario">${formatarValorBR(valoresAlimentacao[ano].estadual[escola.codigoSec] || 0)}</td>`;
                 }
                 html += '</tr>';
             }
@@ -747,22 +769,62 @@
             
             const existe = resumoDados.find(r => r.tipo === tipoBuscaAtual && r.valor === valorBuscaAtual);
             const novoItem = {
-                tipo: tipoBuscaAtual, valor: valorBuscaAtual, identificador: identificador,
-                faed2023: totais.faed[2023], faed2024: totais.faed[2024], faed2025: totais.faed[2025], faed2026: totais.faed[2026],
+                id: Date.now() + Math.random(), // ID único para cada item
+                tipo: tipoBuscaAtual, 
+                valor: valorBuscaAtual, 
+                identificador: identificador,
+                faed2023: totais.faed[2023], 
+                faed2024: totais.faed[2024], 
+                faed2025: totais.faed[2025], 
+                faed2026: totais.faed[2026],
                 alimentacao: totais.alimentacao
             };
             
-            if (existe) Object.assign(existe, novoItem);
-            else resumoDados.push(novoItem);
+            if (existe) {
+                Object.assign(existe, novoItem);
+                existe.id = Date.now() + Math.random();
+            } else {
+                resumoDados.push(novoItem);
+            }
             
             renderResumoConsolidado();
             alert('Dados de ' + identificador + ' adicionados ao resumo!');
+        }
+        
+        function excluirResumoSelecionados() {
+            const checkboxes = document.querySelectorAll('.resumo-item-checkbox');
+            const idsParaExcluir = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    idsParaExcluir.push(parseInt(cb.value));
+                }
+            });
+            
+            if (idsParaExcluir.length === 0) {
+                alert('Selecione pelo menos um item para excluir.');
+                return;
+            }
+            
+            if (confirm(`Tem certeza que deseja excluir ${idsParaExcluir.length} item(ns) do resumo?`)) {
+                resumoDados = resumoDados.filter(item => !idsParaExcluir.includes(item.id));
+                renderResumoConsolidado();
+                alert('Item(s) excluído(s) com sucesso!');
+            }
+        }
+        
+        function selecionarTodosResumo() {
+            const selectAll = document.getElementById('selectAllResumoCheckbox');
+            const checkboxes = document.querySelectorAll('.resumo-item-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
         }
         
         function renderResumoConsolidado() {
             const container = document.getElementById('resumoConsolidado');
             if (resumoDados.length === 0) { 
                 container.innerHTML = '<div class="empty-state"><p>Nenhum dado no resumo.</p></div>'; 
+                document.getElementById('selectAllResumoCheckbox').checked = false;
                 return; 
             }
             
@@ -785,9 +847,10 @@
             }
             
             let html = '<div class="table-wrapper">';
-            html += '<table style="min-width: 1100px;">';
+            html += '<table style="min-width: 1200px;">';
             html += '<thead>';
             html += '<tr style="background: #374151; color: white;">';
+            html += '<th rowspan="3" style="background: #edd5be; vertical-align: middle; width: 40px;">Selecionar</th>';
             html += '<th rowspan="3" style="background: #edd5be; vertical-align: middle;">REPASSE ESCOLARES</th>';
             html += '<th colspan="4" style="background: #a5d0e6;">MANUTENÇÃO</th>';
             html += '<th colspan="8" style="background: #43fa8f;">ALIMENTAÇÃO</th>';
@@ -806,42 +869,61 @@
             
             for (const item of resumoDados) {
                 html += '<tr>';
-                html += '<td style="text-align:left; font-weight:bold;">' + item.identificador + '</td>';
-                html += '<td class="valor-monetario">' + formatarValorBR(item.faed2023) + '</td>';
-                html += '<td class="valor-monetario">' + formatarValorBR(item.faed2024) + '</td>';
-                html += '<td class="valor-monetario">' + formatarValorBR(item.faed2025) + '</td>';
-                html += '<td class="valor-monetario">' + formatarValorBR(item.faed2026) + '</td>';
+                html += `<td class="resumo-checkbox-col"><input type="checkbox" class="resumo-item-checkbox" value="${item.id}"></td>`;
+                html += `<td style="text-align:left; font-weight:bold;">${item.identificador}</td>`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2023)}</td>`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2024)}</td>`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2025)}</td>`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2026)}</td>`;
                 for (let ano of [2023, 2024, 2025, 2026]) {
-                    html += '<td class="valor-monetario">' + formatarValorBR(item.alimentacao[ano].federal) + '</td>';
-                    html += '<td class="valor-monetario">' + formatarValorBR(item.alimentacao[ano].estadual) + '</td>';
+                    html += `<td class="valor-monetario">${formatarValorBR(item.alimentacao[ano].federal)}</td>`;
+                    html += `<td class="valor-monetario">${formatarValorBR(item.alimentacao[ano].estadual)}</td>`;
                 }
                 html += '</tr>';
             }
             
             html += '<tr class="total-row" style="background: #e5e7eb; font-weight: bold;">';
+            html += '<td class="resumo-checkbox-col"></td>';
             html += '<td style="text-align:left;">TOTAL</td>';
-            html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalFAED[2023]) + '</strong></td>';
-            html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalFAED[2024]) + '</strong></td>';
-            html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalFAED[2025]) + '</strong></td>';
-            html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalFAED[2026]) + '</strong></td>';
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalFAED[2023])}</strong></td>`;
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalFAED[2024])}</strong></td>`;
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalFAED[2025])}</strong></td>`;
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalFAED[2026])}</strong></td>`;
             for (let ano of [2023, 2024, 2025, 2026]) {
-                html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoFederal[ano]) + '</strong></td>';
-                html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoEstadual[ano]) + '</strong></td>';
+                html += `<td class="valor-monetario"><strong>${formatarValorBR(totalAlimentacaoFederal[ano])}</strong></td>`;
+                html += `<td class="valor-monetario"><strong>${formatarValorBR(totalAlimentacaoEstadual[ano])}</strong></td>`;
             }
             html += '</tr>';
             
             html += '<tr class="total-geral" style="background: #d1d5db;">';
+            html += '<td class="resumo-checkbox-col"></td>';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong></td>';
-            html += '<td colspan="12" class="valor-monetario"><strong>' + formatarValorBR(totalGeralManutencao) + '</strong></td>';
+            html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralManutencao)}</strong></td>`;
             html += '</tr>';
             
             html += '<tr class="total-geral" style="background: #d1d5db;">';
+            html += '<td class="resumo-checkbox-col"></td>';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong></td>';
-            html += '<td colspan="12" class="valor-monetario"><strong>' + formatarValorBR(totalGeralAlimentacao) + '</strong></td>';
+            html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralAlimentacao)}</strong></td>`;
             html += '</tr>';
             
             html += '</tbody></table></div>';
             container.innerHTML = html;
+            
+            // Adicionar eventos aos checkboxes
+            document.querySelectorAll('.resumo-item-checkbox').forEach(cb => {
+                cb.onchange = () => {
+                    const selectAll = document.getElementById('selectAllResumoCheckbox');
+                    const allCheckboxes = document.querySelectorAll('.resumo-item-checkbox');
+                    const allChecked = Array.from(allCheckboxes).every(c => c.checked);
+                    selectAll.checked = allChecked;
+                };
+            });
+            
+            const selectAllCheckbox = document.getElementById('selectAllResumoCheckbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.onchange = selecionarTodosResumo;
+            }
         }
         
         async function buscarFAED() { 
@@ -868,9 +950,11 @@
         }
         
         function limparResumo() { 
-            resumoDados = []; 
-            renderResumoConsolidado(); 
-            alert('Resumo consolidado foi limpo!');
+            if (confirm('Tem certeza que deseja limpar TODO o resumo consolidado?')) {
+                resumoDados = []; 
+                renderResumoConsolidado(); 
+                alert('Resumo consolidado foi completamente limpo!');
+            }
         }
         
         function exportResumoPDF() { exportarParaPDF(document.getElementById('resumoConsolidado'), 'resumo_nota_tecnica'); }
@@ -885,6 +969,7 @@
         document.getElementById('enviarResumoBtn').onclick = enviarParaResumo;
         document.getElementById('limparGerarBtn').onclick = limparGerar;
         document.getElementById('limparResumoBtn').onclick = limparResumo;
+        document.getElementById('deleteSelectedResumoBtn').onclick = excluirResumoSelecionados;
         document.getElementById('exportPDFBtn').onclick = exportResumoPDF;
         document.getElementById('exportExcelBtn').onclick = exportResumoExcel;
         document.getElementById('exportGerarPDFBtn').onclick = exportGerarPDF;
