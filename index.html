@@ -712,10 +712,10 @@
             html += '<table style="min-width: 1200px;">';
             html += '<thead>';
             html += '<tr style="background: #374151; color: white;">';
-            html += '<th rowspan="3" style="width: 40px;">Selecionar</th>';
             html += '<th rowspan="3">REPASSE ESCOLARES</th>';
             html += '<th colspan="4">MANUTENÇÃO</th>';
             html += '<th colspan="8">ALIMENTAÇÃO</th>';
+            html += '<th rowspan="3" style="width: 50px;">Selecionar</th>';
             html += '</tr>';
             html += '<tr>';
             html += '<th>2023</th><th>2024</th><th>2025</th><th>2026</th>';
@@ -731,7 +731,6 @@
             
             for (const item of resumoDados) {
                 html += '<tr>';
-                html += `<td class="resumo-checkbox-col"><input type="checkbox" class="resumo-item-checkbox" value="${item.id}">`;
                 html += `<td style="text-align:left; font-weight:bold;">${item.identificador}`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2023)}`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2024)}`;
@@ -741,11 +740,11 @@
                     html += `<td class="valor-monetario">${formatarValorBR(item.alimentacao[ano].federal)}`;
                     html += `<td class="valor-monetario">${formatarValorBR(item.alimentacao[ano].estadual)}`;
                 }
+                html += `<td class="resumo-checkbox-col"><input type="checkbox" class="resumo-item-checkbox" value="${item.id}">`;
                 html += '</tr>';
             }
             
             html += '<tr class="total-row">';
-            html += '<td class="resumo-checkbox-col">';
             html += '<td style="text-align:left;"><strong>TOTAL</strong>';
             html += `<td class="valor-monetario"><strong>${formatarValorBR(totalFAED[2023])}</strong>`;
             html += `<td class="valor-monetario"><strong>${formatarValorBR(totalFAED[2024])}</strong>`;
@@ -755,18 +754,19 @@
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalAlimentacaoFederal[ano])}</strong>`;
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalAlimentacaoEstadual[ano])}</strong>`;
             }
+            html += '<td class="resumo-checkbox-col"></td>';
             html += '</tr>';
             
             html += '<tr class="total-geral">';
-            html += '<td class="resumo-checkbox-col">';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong>';
             html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralManutencao)}</strong>`;
+            html += '<td class="resumo-checkbox-col"></td>';
             html += '</tr>';
             
             html += '<tr class="total-geral">';
-            html += '<td class="resumo-checkbox-col">';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong>';
             html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralAlimentacao)}</strong>`;
+            html += '<td class="resumo-checkbox-col"></td>';
             html += '</tr>';
             
             html += '</tbody></table></div>';
