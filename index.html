@@ -39,7 +39,6 @@
         .table-wrapper { overflow-x: auto; margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; font-size: 0.7rem; min-width: 1200px; }
         th, td { padding: 0.5rem 0.5rem; border: 1px solid #d1d5db; text-align: center; vertical-align: middle; }
-        th { background: #9ca3af; color: #000; font-weight: 700; font-size: 0.7rem; }
         .total-row { background: #e5e7eb; font-weight: bold; }
         .total-geral { background: #d1d5db; font-weight: bold; }
         .empty-state { text-align: center; padding: 3rem; color: #94a3b8; }
@@ -51,7 +50,7 @@
         .valor-monetario { font-family: 'Courier New', monospace; font-weight: 500; text-align: right; padding-right: 0.8rem; }
         .report-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-bottom: 1rem; flex-wrap: wrap; }
         .info-message { background: #e6f4ff; padding: 0.5rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.8rem; }
-        td:first-child, td:nth-child(2), td:nth-child(7) { text-align: left; }
+        td:first-child, td:nth-child(2) { text-align: left; }
         .search-with-button { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
         .search-with-button .form-group { flex: 2; min-width: 300px; }
         .search-with-button button { margin-bottom: 0; }
@@ -168,6 +167,20 @@
         }
         .delete-selected-btn:hover {
             background: #b91c1c;
+        }
+        
+        /* Cores específicas da tabela */
+        .th-manutencao {
+            background: #a5d0e6 !important;
+            color: #1e3a5f;
+        }
+        .th-alimentacao {
+            background: #fff3cd !important;
+            color: #856404;
+        }
+        .th-repasse {
+            background: #edd5be !important;
+            color: #5a3e1b;
         }
         
         @media print {
@@ -546,7 +559,7 @@
             for (const escola of resultados) {
                 const isSelected = escolasSelecionadas.some(s => s.codigoSec === escola.codigoSec);
                 html += `<tr class="${isSelected ? 'selected-row' : ''}">`;
-                html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}></td>`;
+                html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}>`;
                 html += `<td><strong>${escola.nte || '-'}</strong>`;
                 html += `<td>${escola.municipio || '-'}`;
                 html += `<td>${escola.codigoSec || '-'}`;
@@ -709,23 +722,36 @@
             }
             
             let html = '<div class="table-wrapper">';
-            html += '<table style="min-width: 1200px;">';
+            html += '<table style="min-width: 1300px;">';
             html += '<thead>';
+            // Primeira linha do cabeçalho
             html += '<tr style="background: #374151; color: white;">';
-            html += '<th rowspan="3">REPASSE ESCOLARES</th>';
-            html += '<th colspan="4">MANUTENÇÃO</th>';
-            html += '<th colspan="8">ALIMENTAÇÃO</th>';
-            html += '<th rowspan="3" style="width: 50px;">Selecionar</th>';
+            html += '<th rowspan="3" class="th-repasse" style="background: #edd5be; color: #5a3e1b;">REPASSE ESCOLARES</th>';
+            html += '<th colspan="4" class="th-manutencao" style="background: #a5d0e6;">MANUTENÇÃO</th>';
+            html += '<th colspan="8" class="th-alimentacao" style="background: #fff3cd;">ALIMENTAÇÃO</th>';
+            html += '<th rowspan="3" style="width: 50px; background: #f8fafc;">Selecionar</th>';
             html += '</tr>';
-            html += '<tr>';
-            html += '<th>2023</th><th>2024</th><th>2025</th><th>2026</th>';
-            html += '<th colspan="2">2023</th><th colspan="2">2024</th><th colspan="2">2025</th><th colspan="2">2026</th>';
-            html += '</tr>';
+            // Segunda linha do cabeçalho
             html += '<tr style="background: #6b7280;">';
-            html += '<th>Federal</th><th>Estadual</th>';
-            html += '<th>Federal</th><th>Estadual</th>';
-            html += '<th>Federal</th><th>Estadual</th>';
-            html += '<th>Federal</th><th>Estadual</th>';
+            html += '<th rowspan="2" style="background: #a5d0e6;">2023</th>';
+            html += '<th rowspan="2" style="background: #a5d0e6;">2024</th>';
+            html += '<th rowspan="2" style="background: #a5d0e6;">2025</th>';
+            html += '<th rowspan="2" style="background: #a5d0e6;">2026</th>';
+            html += '<th colspan="2" style="background: #fff3cd;">2023</th>';
+            html += '<th colspan="2" style="background: #fff3cd;">2024</th>';
+            html += '<th colspan="2" style="background: #fff3cd;">2025</th>';
+            html += '<th colspan="2" style="background: #fff3cd;">2026</th>';
+            html += '</tr>';
+            // Terceira linha do cabeçalho
+            html += '<tr style="background: #6b7280;">';
+            html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
+            html += '<th style="background: #fff3cd;">Estadual - FAED</th>';
+            html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
+            html += '<th style="background: #fff3cd;">Estadual - FAED</th>';
+            html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
+            html += '<th style="background: #fff3cd;">Estadual - FAED</th>';
+            html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
+            html += '<th style="background: #fff3cd;">Estadual - FAED</th>';
             html += '</tr>';
             html += '</thead><tbody>';
             
@@ -754,19 +780,19 @@
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalAlimentacaoFederal[ano])}</strong>`;
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalAlimentacaoEstadual[ano])}</strong>`;
             }
-            html += '<td class="resumo-checkbox-col"></td>';
+            html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
             html += '<tr class="total-geral">';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong>';
             html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralManutencao)}</strong>`;
-            html += '<td class="resumo-checkbox-col"></td>';
+            html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
             html += '<tr class="total-geral">';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong>';
             html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralAlimentacao)}</strong>`;
-            html += '<td class="resumo-checkbox-col"></td>';
+            html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
             html += '</tbody></table></div>';
