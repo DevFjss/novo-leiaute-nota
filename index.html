@@ -682,7 +682,7 @@
             alert('Dados de ' + identificador + ' adicionados ao resumo!');
         }
         
-        function renderResumoConsolidado() {
+       function renderResumoConsolidado() {
     const container = document.getElementById('resumoConsolidado');
     if (resumoDados.length === 0) { 
         container.innerHTML = '<div class="empty-state"><p>Nenhum dado no resumo.</p></div>'; 
@@ -736,17 +736,14 @@
     html += '<th rowspan="3" style="background: #edd5be; vertical-align: middle;">REPASSE ESCOLARES</th>';
     html += '<th colspan="4" style="background: #a5d0e6;">MANUTENÇÃO</th>';
     html += '<th colspan="8" style="background: #43fa8f;">ALIMENTAÇÃO</th>';
-    html += '</tr>';
     html += '<tr style="background: #43fa8f; color: white;">';
     html += '<th rowspan="2">2023</th><th rowspan="2">2024</th><th rowspan="2">2025</th><th rowspan="2">2026</th>';
     html += '<th colspan="2">2023</th><th colspan="2">2024</th><th colspan="2">2025</th><th colspan="2">2026</th>';
-    html += '</tr>';
     html += '<tr style="font-size: 0.7rem;">';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
-    html += '</tr>';
     html += '</thead><tbody>';
     
     for (const item of resumoDados) {
@@ -775,39 +772,42 @@
     }
     html += '</tr>';
     
-    // NOVA LINHA COM TÍTULOS NTE E MUNICÍPIO
-    html += '<tr style="background: #d1d5db; font-weight: bold;">';
+    // LINHA COM OS TÍTULOS NTE E MUNICÍPIO
+    html += '<tr style="background: #d1d5db;">';
     html += '<td style="text-align:left;">&nbsp;</td>';
     html += '<td style="text-align:center;"><strong>NTE</strong></td>';
     html += '<td style="text-align:center;"><strong>MUNICÍPIO</strong></td>';
-    html += '<td>&nbsp;</td>';
-    html += '<td>&nbsp;</td>';
+    html += '<td colspan="2" style="text-align:center;">&nbsp;</td>';
     for (let i = 0; i < 8; i++) {
-        html += '<td>&nbsp;</td>';
+        html += '<td style="text-align:center;">&nbsp;</td>';
     }
     html += '</tr>';
     
-    // LINHA DOS VALORES DE NTE E MUNICÍPIO
+    // TOTAL GERAL MANUTENÇÃO - SÓ COM OS VALORES DE NTE E MUNICÍPIO, O RESTO VAZIO
     html += '<tr class="total-geral" style="background: #d1d5db;">';
     html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalManutencaoPorNTE) + '</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalManutencaoPorMunicipio) + '</strong></td>';
-    html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalFAED[2025]) + '</strong></td>';
-    html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalFAED[2026]) + '</strong></td>';
-    for (let ano of [2023, 2024, 2025, 2026]) {
-        html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoFederal[ano]) + '</strong></td>';
-        html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoEstadual[ano]) + '</strong></td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    for (let i = 0; i < 8; i++) {
+        html += '<td class="valor-monetario">0,00</td>';
     }
     html += '</tr>';
     
-    // TOTAL GERAL ALIMENTAÇÃO
+    // TOTAL GERAL ALIMENTAÇÃO - SÓ COM OS VALORES DE NTE E MUNICÍPIO, O RESTO VAZIO
     html += '<tr class="total-geral" style="background: #d1d5db;">';
     html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoPorNTE) + '</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoPorMunicipio) + '</strong></td>';
-    html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalGeralAlimentacao) + '</strong></td>';
-    for (let i = 0; i < 9; i++) {
-        html += '<td class="valor-monetario">&nbsp;</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    html += '<td class="valor-monetario">0,00</td>';
+    for (let i = 0; i < 8; i++) {
+        html += '<td class="valor-monetario">0,00</td>';
     }
     html += '</tr>';
     
