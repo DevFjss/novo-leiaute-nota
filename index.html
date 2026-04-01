@@ -739,24 +739,29 @@
             }
             html += '</tr>';
             
-            // Linha para TOTAL GERAL MANUTENÇÃO com NTE e MUNICÍPIO
-            html += '<tr class="total-geral" style="background: #d1d5db;">';
-            html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong> </td>';
-            html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalGeralManutencao) + '</strong> </td>';
-            html += '<td style="text-align:center;"><strong>NTE</strong> </td>';
-            html += '<td class="valor-monetario" style="text-align:center;"><strong>-</strong> </td>';
-            html += '<td style="text-align:center;"><strong>MUNICÍPIO</strong> </td>';
-            html += '<td class="valor-monetario" style="text-align:center;"><strong>-</strong> </td>';
-            // Preencher células restantes com vazio para manter o layout da tabela
-            for (let i = 0; i < 7; i++) {
-                html += '<td></td>';
-            }
-            html += '</tr>';
-            
-            html += '<tr class="total-geral" style="background: #d1d5db;">';
-            html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong></td>';
-            html += '<td colspan="12" class="valor-monetario"><strong>' + formatarValorBR(totalGeralAlimentacao) + '</strong></td>';
-            html += '</tr>';
+           // TOTAL GERAL MANUTENÇÃO com NTE e MUNICÍPIO
+html += '<tr class="total-geral" style="background: #d1d5db;">';
+html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong> </td>';
+html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalGeralManutencao) + '</strong> </td>';
+html += '<td style="text-align:center;"><strong>NTE</strong> </td>';
+html += '<td class="valor-monetario" style="text-align:center;">0,00</td>';
+html += '<td style="text-align:center;"><strong>MUNICÍPIO</strong> </td>';
+html += '<td class="valor-monetario" style="text-align:center;">0,00</td>';
+// Preencher células restantes para manter o layout da tabela
+html += '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
+html += '</tr>';
+
+// TOTAL GERAL ALIMENTAÇÃO com NTE e MUNICÍPIO
+html += '<tr class="total-geral" style="background: #d1d5db;">';
+html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong> </td>';
+html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalGeralAlimentacao) + '</strong> </td>';
+html += '<td style="text-align:center;"><strong>NTE</strong> </td>';
+html += '<td class="valor-monetario" style="text-align:center;">0,00</td>';
+html += '<td style="text-align:center;"><strong>MUNICÍPIO</strong> </td>';
+html += '<td class="valor-monetario" style="text-align:center;">0,00</td>';
+// Preencher células restantes para manter o layout da tabela
+html += '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>';
+html += '</tr>';
             
             html += '</tbody></table></div>';
             container.innerHTML = html;
