@@ -775,39 +775,36 @@
     }
     html += '</tr>';
     
-    // LINHA COM OS TÍTULOS NTE E MUNICÍPIO (EMBRANCO)
+    // LINHA COM OS TÍTULOS NTE E MUNICÍPIO
     html += '<tr style="background: #d1d5db;">';
     html += '<td style="text-align:left;">&nbsp;</td>';
     html += '<td style="text-align:center;"><strong>NTE</strong></td>';
     html += '<td style="text-align:center;"><strong>MUNICÍPIO</strong></td>';
-    html += '<td style="text-align:center;">&nbsp;</td>';
-    html += '<td style="text-align:center;">&nbsp;</td>';
-    for (let i = 0; i < 8; i++) {
+    // Preencher o restante das células com vazio
+    for (let i = 0; i < 10; i++) {
         html += '<td style="text-align:center;">&nbsp;</td>';
     }
     html += '</tr>';
     
-    // TOTAL GERAL MANUTENÇÃO - NTE e MUNICÍPIO nas colunas 2023 e 2024
+    // TOTAL GERAL MANUTENÇÃO
     html += '<tr class="total-geral" style="background: #d1d5db;">';
     html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalManutencaoPorNTE) + '</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalManutencaoPorMunicipio) + '</strong></td>';
-    html += '<td class="valor-monetario">0,00</td>';
-    html += '<td class="valor-monetario">0,00</td>';
-    for (let i = 0; i < 8; i++) {
-        html += '<td class="valor-monetario">0,00</td>';
+    // Preencher o restante com vazio
+    for (let i = 0; i < 10; i++) {
+        html += '<td class="valor-monetario">&nbsp;</td>';
     }
     html += '</tr>';
     
-    // TOTAL GERAL ALIMENTAÇÃO - NTE e MUNICÍPIO nas colunas 2023 e 2024
+    // TOTAL GERAL ALIMENTAÇÃO
     html += '<tr class="total-geral" style="background: #d1d5db;">';
     html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoPorNTE) + '</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoPorMunicipio) + '</strong></td>';
-    html += '<td class="valor-monetario">0,00</td>';
-    html += '<td class="valor-monetario">0,00</td>';
-    for (let i = 0; i < 8; i++) {
-        html += '<td class="valor-monetario">0,00</td>';
+    // Preencher o restante com vazio
+    for (let i = 0; i < 10; i++) {
+        html += '<td class="valor-monetario">&nbsp;</td>';
     }
     html += '</tr>';
     
