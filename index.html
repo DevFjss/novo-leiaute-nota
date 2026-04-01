@@ -736,14 +736,17 @@
     html += '<th rowspan="3" style="background: #edd5be; vertical-align: middle;">REPASSE ESCOLARES</th>';
     html += '<th colspan="4" style="background: #a5d0e6;">MANUTENÇÃO</th>';
     html += '<th colspan="8" style="background: #43fa8f;">ALIMENTAÇÃO</th>';
+    html += '</tr>';
     html += '<tr style="background: #43fa8f; color: white;">';
     html += '<th rowspan="2">2023</th><th rowspan="2">2024</th><th rowspan="2">2025</th><th rowspan="2">2026</th>';
     html += '<th colspan="2">2023</th><th colspan="2">2024</th><th colspan="2">2025</th><th colspan="2">2026</th>';
+    html += '</tr>';
     html += '<tr style="font-size: 0.7rem;">';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
     html += '<th style="background:#43fa8f;">Federal - PNAE</th><th style="background:#43fa8f;">Estadual - FAED</th>';
+    html += '</tr>';
     html += '</thead><tbody>';
     
     for (const item of resumoDados) {
@@ -772,24 +775,23 @@
     }
     html += '</tr>';
     
-    // LINHA COM OS TÍTULOS NTE E MUNICÍPIO
+    // LINHA COM OS TÍTULOS NTE E MUNICÍPIO (EMBRANCO)
     html += '<tr style="background: #d1d5db;">';
     html += '<td style="text-align:left;">&nbsp;</td>';
     html += '<td style="text-align:center;"><strong>NTE</strong></td>';
     html += '<td style="text-align:center;"><strong>MUNICÍPIO</strong></td>';
-    html += '<td colspan="2" style="text-align:center;">&nbsp;</td>';
+    html += '<td style="text-align:center;">&nbsp;</td>';
+    html += '<td style="text-align:center;">&nbsp;</td>';
     for (let i = 0; i < 8; i++) {
         html += '<td style="text-align:center;">&nbsp;</td>';
     }
     html += '</tr>';
     
-    // TOTAL GERAL MANUTENÇÃO - SÓ COM OS VALORES DE NTE E MUNICÍPIO, O RESTO VAZIO
+    // TOTAL GERAL MANUTENÇÃO - NTE e MUNICÍPIO nas colunas 2023 e 2024
     html += '<tr class="total-geral" style="background: #d1d5db;">';
     html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalManutencaoPorNTE) + '</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalManutencaoPorMunicipio) + '</strong></td>';
-    html += '<td class="valor-monetario">0,00</td>';
-    html += '<td class="valor-monetario">0,00</td>';
     html += '<td class="valor-monetario">0,00</td>';
     html += '<td class="valor-monetario">0,00</td>';
     for (let i = 0; i < 8; i++) {
@@ -797,13 +799,11 @@
     }
     html += '</tr>';
     
-    // TOTAL GERAL ALIMENTAÇÃO - SÓ COM OS VALORES DE NTE E MUNICÍPIO, O RESTO VAZIO
+    // TOTAL GERAL ALIMENTAÇÃO - NTE e MUNICÍPIO nas colunas 2023 e 2024
     html += '<tr class="total-geral" style="background: #d1d5db;">';
     html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoPorNTE) + '</strong></td>';
     html += '<td class="valor-monetario"><strong>' + formatarValorBR(totalAlimentacaoPorMunicipio) + '</strong></td>';
-    html += '<td class="valor-monetario">0,00</td>';
-    html += '<td class="valor-monetario">0,00</td>';
     html += '<td class="valor-monetario">0,00</td>';
     html += '<td class="valor-monetario">0,00</td>';
     for (let i = 0; i < 8; i++) {
