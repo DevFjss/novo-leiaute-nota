@@ -171,8 +171,8 @@
         
         /* Cores específicas da tabela */
         .th-manutencao {
-            background: #a5d0e6 !important;
-            color: #1e3a5f;
+            background: #9ca3af !important;
+            color: #1f2937;
         }
         .th-alimentacao {
             background: #fff3cd !important;
@@ -227,7 +227,7 @@
                 </div>
                 <div class="info-message" style="margin-top: 1rem;">
                     <i class="fas fa-info-circle"></i> 
-                    <strong>Filtro automático:</strong> Digite na caixa acima para filtrar por NTE (exato), Município, Código SEC, Código INEP ou Unidade Escolar (contém)<br>
+                    <strong>Filtro automático:</strong> Digite na caixa acima para filtrar por NTE (exato), Município (exato), Código SEC, Código INEP ou Unidade Escolar (contém)<br>
                     <strong>Selecione as escolas:</strong> Marque os checkboxes e use "Enviar Selecionados" para levar à aba Gerar Valor
                 </div>
             </div>
@@ -343,6 +343,7 @@
         let resumoDados = [];
         let tipoBuscaAtual = '';
         let valorBuscaAtual = '';
+        let municipioExatoAtual = '';
         let nextId = 1;
         
         function formatarValorBR(valor) {
@@ -524,22 +525,43 @@
                 resultados = escolasData;
                 tipoBuscaAtual = '';
                 valorBuscaAtual = '';
+                municipioExatoAtual = '';
             } else {
                 const termoNormalizado = normalizarTexto(termo);
+                
+                // Verificar se é NTE exato
                 const nteExato = escolasData.filter(escola => escola.nte === termo);
                 if (nteExato.length > 0) {
                     resultados = nteExato;
                     tipoBuscaAtual = 'NTE';
                     valorBuscaAtual = termo;
+                    municipioExatoAtual = '';
                 } else {
-                    resultados = escolasData.filter(escola => {
-                        return normalizarTexto(escola.municipio).includes(termoNormalizado) ||
-                               normalizarTexto(escola.codigoSec).includes(termoNormalizado) ||
-                               normalizarTexto(escola.codigoInep).includes(termoNormalizado) ||
-                               normalizarTexto(escola.unidadeEscolar).includes(termoNormalizado);
-                    });
-                    if (resultados.length > 0) tipoBuscaAtual = 'FILTRO';
-                    else { resultados = []; tipoBuscaAtual = ''; valorBuscaAtual = ''; }
+                    // Verificar se é MUNICÍPIO EXATO (comparação normalizada)
+                    const municipioExato = escolasData.filter(escola => normalizarTexto(escola.municipio) === termoNormalizado);
+                    if (municipioExato.length > 0) {
+                        resultados = municipioExato;
+                        tipoBuscaAtual = 'MUNICIPIO';
+                        valorBuscaAtual = termoNormalizado;
+                        municipioExatoAtual = municipioExato[0].municipio;
+                    } else {
+                        // Busca por Código SEC, Código INEP ou nome da escola (contém)
+                        resultados = escolasData.filter(escola => {
+                            return normalizarTexto(escola.codigoSec).includes(termoNormalizado) ||
+                                   normalizarTexto(escola.codigoInep).includes(termoNormalizado) ||
+                                   normalizarTexto(escola.unidadeEscolar).includes(termoNormalizado);
+                        });
+                        if (resultados.length > 0) {
+                            tipoBuscaAtual = 'ESCOLA';
+                            valorBuscaAtual = termo;
+                            municipioExatoAtual = '';
+                        } else {
+                            resultados = [];
+                            tipoBuscaAtual = '';
+                            valorBuscaAtual = '';
+                            municipioExatoAtual = '';
+                        }
+                    }
                 }
             }
             mostrarResultados(resultados);
@@ -567,7 +589,7 @@
                 html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}`;
                 html += `</tr>`;
             }
-            html += '</tbody>...</div>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
             
             document.querySelectorAll('.school-checkbox').forEach(cb => {
@@ -633,7 +655,7 @@
                     html += `<td class="valor-monetario">${formatarValorBR(valoresAlimentacao[ano].federal[escola.codigoSec] || 0)}`;
                     html += `<td class="valor-monetario">${formatarValorBR(valoresAlimentacao[ano].estadual[escola.codigoSec] || 0)}`;
                 }
-                html += '</tr>';
+                html += `</tr>`;
             }
             html += '</tbody></table></div>';
             container.innerHTML = html;
@@ -658,9 +680,18 @@
                 return;
             }
             const totais = calcularTotaisEscolas(escolasSelecionadas);
-            const identificador = tipoBuscaAtual === 'NTE' ? `NTE ${valorBuscaAtual}` : 
-                                  tipoBuscaAtual === 'FILTRO' ? `Filtro: ${document.getElementById('searchValue').value}` : 
-                                  'Seleção Manual';
+            
+            let identificador = '';
+            if (tipoBuscaAtual === 'NTE') {
+                identificador = `NTE ${valorBuscaAtual}`;
+            } else if (tipoBuscaAtual === 'MUNICIPIO') {
+                // Usar o município exato em maiúsculas
+                identificador = municipioExatoAtual ? municipioExatoAtual.toUpperCase() : valorBuscaAtual.toUpperCase();
+            } else if (tipoBuscaAtual === 'ESCOLA') {
+                identificador = `ESCOLA: ${valorBuscaAtual.toUpperCase()}`;
+            } else {
+                identificador = 'SELEÇÃO MANUAL';
+            }
             
             const novoItem = {
                 id: nextId++,
@@ -673,7 +704,7 @@
             };
             resumoDados.push(novoItem);
             renderResumoConsolidado();
-            alert(`Dados adicionados ao resumo!`);
+            alert(`Dados de ${identificador} adicionados ao resumo!`);
         }
         
         function excluirResumoSelecionados() {
@@ -727,16 +758,16 @@
             // Primeira linha do cabeçalho
             html += '<tr style="background: #374151; color: white;">';
             html += '<th rowspan="3" class="th-repasse" style="background: #edd5be; color: #5a3e1b;">REPASSE ESCOLARES</th>';
-            html += '<th colspan="4" class="th-manutencao" style="background: #a5d0e6;">MANUTENÇÃO</th>';
+            html += '<th colspan="4" class="th-manutencao" style="background: #9ca3af;">MANUTENÇÃO</th>';
             html += '<th colspan="8" class="th-alimentacao" style="background: #fff3cd;">ALIMENTAÇÃO</th>';
             html += '<th rowspan="3" style="width: 50px; background: #f8fafc;">Selecionar</th>';
             html += '</tr>';
             // Segunda linha do cabeçalho
             html += '<tr style="background: #6b7280;">';
-            html += '<th rowspan="2" style="background: #a5d0e6;">2023</th>';
-            html += '<th rowspan="2" style="background: #a5d0e6;">2024</th>';
-            html += '<th rowspan="2" style="background: #a5d0e6;">2025</th>';
-            html += '<th rowspan="2" style="background: #a5d0e6;">2026</th>';
+            html += '<th rowspan="2" style="background: #9ca3af;">2023</th>';
+            html += '<th rowspan="2" style="background: #9ca3af;">2024</th>';
+            html += '<th rowspan="2" style="background: #9ca3af;">2025</th>';
+            html += '<th rowspan="2" style="background: #9ca3af;">2026</th>';
             html += '<th colspan="2" style="background: #fff3cd;">2023</th>';
             html += '<th colspan="2" style="background: #fff3cd;">2024</th>';
             html += '<th colspan="2" style="background: #fff3cd;">2025</th>';
