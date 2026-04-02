@@ -741,44 +741,44 @@
             return { faed, alimentacao };
         }
         
-        async function enviarParaResumo() {
+       async function enviarParaResumo() {
     if (escolasSelecionadas.length === 0) {
         alert('Selecione escolas primeiro');
         return;
     }
+    const totais = calcularTotaisEscolas(escolasSelecionadas);  // ← SOMAVA TUDO JUNTO
     
-    // Agrupar escolas por município (sempre)
-    const escolasPorMunicipio = {};
-    for (const escola of escolasSelecionadas) {
-        const municipio = escola.municipio;
-        if (!escolasPorMunicipio[municipio]) {
-            escolasPorMunicipio[municipio] = [];
+    let identificador = '';
+    let tipoItem = '';
+    
+    if (tipoBuscaAtual === 'NTE') {
+        identificador = `NTE ${valorBuscaAtual}`;
+        tipoItem = 'NTE';
+    } else if (tipoBuscaAtual === 'MUNICIPIO') {
+        identificador = municipioExatoAtual ? municipioExatoAtual.toUpperCase() : valorBuscaAtual.toUpperCase();
+        tipoItem = 'MUNICIPIO';
+    } else {
+        if (escolasSelecionadas.length > 0) {
+            const primeiraEscola = escolasSelecionadas[0];  // ← PEGAVA SÓ A PRIMEIRA
+            identificador = primeiraEscola.municipio ? primeiraEscola.municipio.toUpperCase() : `SELEÇÃO ${escolasSelecionadas.length} ESCOLAS`;
+            tipoItem = 'MANUAL';
         }
-        escolasPorMunicipio[municipio].push(escola);
     }
     
-    // Para cada município, calcular e adicionar ao resumo
-    for (const [municipio, escolas] of Object.entries(escolasPorMunicipio)) {
-        const totais = calcularTotaisEscolas(escolas);
-        
-        let identificador = municipio.toUpperCase();
-        let tipoItem = 'MUNICIPIO';
-        
-        const novoItem = {
-            id: nextId++,
-            identificador: identificador,
-            tipo: tipoItem,
-            faed2023: totais.faed[2023],
-            faed2024: totais.faed[2024],
-            faed2025: totais.faed[2025],
-            faed2026: totais.faed[2026],
-            alimentacao: totais.alimentacao
-        };
-        resumoDados.push(novoItem);
-    }
+    const novoItem = {
+        id: nextId++,
+        identificador: identificador,
+        tipo: tipoItem,
+        faed2023: totais.faed[2023],
+        faed2024: totais.faed[2024],
+        faed2025: totais.faed[2025],
+        faed2026: totais.faed[2026],
+        alimentacao: totais.alimentacao
+    };
+    resumoDados.push(novoItem);  // ← ADICIONAVA UM ÚNICO ITEM
     
     renderResumoConsolidado();
-    alert(`Dados de ${Object.keys(escolasPorMunicipio).length} município(s) adicionados ao resumo!`);
+    alert(`Dados de ${identificador} adicionados ao resumo!`);
 }
         
         function excluirResumoSelecionados() {
