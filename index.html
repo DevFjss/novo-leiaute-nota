@@ -729,13 +729,44 @@
         }
         
         async function enviarParaResumo() {
-            if (escolasSelecionadas.length === 0 && tipoBuscaAtual === '') { 
-                alert('Selecione escolas ou faça uma busca primeiro'); 
-                return; 
-            }
-            
-            const listaCalculo = escolasSelecionadas.length > 0 ? escolasSelecionadas : escolasData;
-            const totais = calcularTotaisEscolas(listaCalculo);
+    if (escolasSelecionadas.length === 0) {
+        alert('Selecione escolas primeiro');
+        return;
+    }
+    
+    // Agrupar escolas por município
+    const escolasPorMunicipio = {};
+    for (const escola of escolasSelecionadas) {
+        const municipio = escola.municipio;
+        if (!escolasPorMunicipio[municipio]) {
+            escolasPorMunicipio[municipio] = [];
+        }
+        escolasPorMunicipio[municipio].push(escola);
+    }
+    
+    // Para cada município, calcular e adicionar ao resumo
+    for (const [municipio, escolas] of Object.entries(escolasPorMunicipio)) {
+        const totais = calcularTotaisEscolas(escolas);
+        
+        let identificador = municipio.toUpperCase();
+        let tipoItem = 'MUNICIPIO';
+        
+        const novoItem = {
+            id: nextId++,
+            identificador: identificador,
+            tipo: tipoItem,
+            faed2023: totais.faed[2023],
+            faed2024: totais.faed[2024],
+            faed2025: totais.faed[2025],
+            faed2026: totais.faed[2026],
+            alimentacao: totais.alimentacao
+        };
+        resumoDados.push(novoItem);
+    }
+    
+    renderResumoConsolidado();
+    alert(`Dados de ${Object.keys(escolasPorMunicipio).length} município(s) adicionados ao resumo!`);
+}
             
             let identificador = '';
             if (tipoBuscaAtual === 'NTE') identificador = 'NTE ' + valorBuscaAtual;
