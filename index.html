@@ -747,8 +747,7 @@
         return;
     }
     
-    // ⬇️⬇️⬇️ NOVO CÓDIGO ADICIONADO ⬇️⬇️⬇️
-    // Agrupar escolas por município
+    // Agrupar escolas por município (sempre)
     const escolasPorMunicipio = {};
     for (const escola of escolasSelecionadas) {
         const municipio = escola.municipio;
@@ -757,13 +756,12 @@
         }
         escolasPorMunicipio[municipio].push(escola);
     }
-    // ⬆️⬆️⬆️ NOVO CÓDIGO ADICIONADO ⬆️⬆️⬆️
     
-    // ⬇️⬇️⬇️ ALTERADO - Agora é um LOOP para cada município ⬇️⬇️⬇️
+    // Para cada município, calcular e adicionar ao resumo
     for (const [municipio, escolas] of Object.entries(escolasPorMunicipio)) {
-        const totais = calcularTotaisEscolas(escolas);  // ← SOMA SÓ AS ESCOLAS DESSE MUNICÍPIO
+        const totais = calcularTotaisEscolas(escolas);
         
-        let identificador = municipio.toUpperCase();  // ← USA O NOME DO MUNICÍPIO
+        let identificador = municipio.toUpperCase();
         let tipoItem = 'MUNICIPIO';
         
         const novoItem = {
@@ -776,12 +774,11 @@
             faed2026: totais.faed[2026],
             alimentacao: totais.alimentacao
         };
-        resumoDados.push(novoItem);  // ← ADICIONA UM ITEM POR MUNICÍPIO
+        resumoDados.push(novoItem);
     }
-    // ⬆️⬆️⬆️ ALTERADO ⬆️⬆️⬆️
     
     renderResumoConsolidado();
-    alert(`Dados de ${Object.keys(escolasPorMunicipio).length} município(s) adicionados ao resumo!`);  // ← ALTERADO
+    alert(`Dados de ${Object.keys(escolasPorMunicipio).length} município(s) adicionados ao resumo!`);
 }
         
         function excluirResumoSelecionados() {
