@@ -564,53 +564,90 @@
         }
         
         function mostrarResultados(resultados) {
-            const container = document.getElementById('resultsTable');
-            document.getElementById('resultCount').innerHTML = resultados.length + ' registros';
-            if (resultados.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>Nenhum resultado</p></div>';
-                return;
+    const container = document.getElementById('resultsTable');
+    document.getElementById('resultCount').innerHTML = resultados.length + ' registros';
+    
+    if (resultados.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Nenhum resultado</p></div>';
+        return;
+    }
+    
+    let html = '<div class="table-wrapper">';
+    html += '<table>';
+    html += '<thead>';
+    html += '<tr>';
+    html += '<th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox"></th>';
+    html += '<th>NTE</th>';
+    html += '<th>Município</th>';
+    html += '<th>Código SEC</th>';
+    html += '<th>Código INEP</th>';
+    html += '<th>Unidade Escolar</th>';
+    html += '</tr>';
+    html += '</thead>';
+    html += '<tbody>';
+    
+    for (const escola of resultados) {
+        const isSelected = escolasSelecionadas.some(s => s.codigoSec === escola.codigoSec);
+        html += `<tr class="${isSelected ? 'selected-row' : ''}">`;
+        html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}></td>`;
+        html += `<td><strong>${escola.nte || '-'}</strong></td>`;
+        html += `<td>${escola.municipio || '-'}</td>`;
+        html += `<td>${escola.codigoSec || '-'}</td>`;
+        html += `<td>${escola.codigoInep || '-'}</td>`;
+        html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}</td>`;
+        html += `</tr>`;
+    }
+    
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    container.innerHTML = html;
+    
+    // Adicionar eventos aos checkboxes
+    document.querySelectorAll('.school-checkbox').forEach(cb => {
+        cb.onchange = () => {
+            const codigo = cb.dataset.codigo;
+            const escola = escolasData.find(e => e.codigoSec === codigo);
+            if (cb.checked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) {
+                escolasSelecionadas.push(escola);
+            } else if (!cb.checked) {
+                escolasSelecionadas = escolasSelecionadas.filter(s => s.codigoSec !== codigo);
             }
-            let html = '<div class="table-wrapper">\n<tr>\n<thead>\n<tr>';
-            html += '<th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox"></th>';
-            html += '<th>NTE</th><th>Município</th><th>Código SEC</th><th>Código INEP</th><th>Unidade Escolar</th>';
-            html += '</tr></thead><tbody>';
-            for (const escola of resultados) {
-                const isSelected = escolasSelecionadas.some(s => s.codigoSec === escola.codigoSec);
-                html += `<tr class="${isSelected ? 'selected-row' : ''}">`;
-                html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}>`;
-                html += `<td><strong>${escola.nte || '-'}</strong>`;
-                html += `<td>${escola.municipio || '-'}`;
-                html += `<td>${escola.codigoSec || '-'}`;
-                html += `<td>${escola.codigoInep || '-'}`;
-                html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}`;
-                html += `</tr>`;
+            // Atualizar a classe da linha
+            const row = cb.closest('tr');
+            if (row) {
+                if (cb.checked) row.classList.add('selected-row');
+                else row.classList.remove('selected-row');
             }
-            html += '</tbody>...</div>';
-            container.innerHTML = html;
-            
+            renderGerarTabela();
+            atualizarCardsGerarValor();
+        };
+    });
+    
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (selectAll) {
+        selectAll.onchange = (e) => {
+            const isChecked = e.target.checked;
             document.querySelectorAll('.school-checkbox').forEach(cb => {
-                cb.onchange = () => {
-                    const codigo = cb.dataset.codigo;
-                    const escola = escolasData.find(e => e.codigoSec === codigo);
-                    if (cb.checked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) escolasSelecionadas.push(escola);
-                    else if (!cb.checked) escolasSelecionadas = escolasSelecionadas.filter(s => s.codigoSec !== codigo);
-                    renderGerarTabela();
-                    atualizarCardsGerarValor();
-                };
+                cb.checked = isChecked;
+                const codigo = cb.dataset.codigo;
+                const escola = escolasData.find(e => e.codigoSec === codigo);
+                if (isChecked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) {
+                    escolasSelecionadas.push(escola);
+                } else if (!isChecked) {
+                    escolasSelecionadas = [];
+                }
+                const row = cb.closest('tr');
+                if (row) {
+                    if (isChecked) row.classList.add('selected-row');
+                    else row.classList.remove('selected-row');
+                }
             });
-            document.getElementById('selectAllCheckbox').onchange = (e) => {
-                const isChecked = e.target.checked;
-                document.querySelectorAll('.school-checkbox').forEach(cb => {
-                    cb.checked = isChecked;
-                    const codigo = cb.dataset.codigo;
-                    const escola = escolasData.find(e => e.codigoSec === codigo);
-                    if (isChecked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) escolasSelecionadas.push(escola);
-                    else if (!isChecked) escolasSelecionadas = [];
-                });
-                renderGerarTabela();
-                atualizarCardsGerarValor();
-            };
-        }
+            renderGerarTabela();
+            atualizarCardsGerarValor();
+        };
+    }
+}
         
         function exportarParaGerar() {
             if (escolasSelecionadas.length === 0) { alert('Selecione pelo menos uma escola'); return; }
