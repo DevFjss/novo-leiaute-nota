@@ -564,90 +564,88 @@
         }
         
         function mostrarResultados(resultados) {
-    const container = document.getElementById('resultsTable');
-    document.getElementById('resultCount').innerHTML = resultados.length + ' registros';
-    
-    if (resultados.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>Nenhum resultado</p></div>';
-        return;
-    }
-    
-    let html = '<div class="table-wrapper">';
-    html += '<table>';
-    html += '<thead>';
-    html += '<tr>';
-    html += '<th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox"></th>';
-    html += '<th>NTE</th>';
-    html += '<th>Município</th>';
-    html += '<th>Código SEC</th>';
-    html += '<th>Código INEP</th>';
-    html += '<th>Unidade Escolar</th>';
-    html += '</tr>';
-    html += '</thead>';
-    html += '<tbody>';
-    
-    for (const escola of resultados) {
-        const isSelected = escolasSelecionadas.some(s => s.codigoSec === escola.codigoSec);
-        html += `<tr class="${isSelected ? 'selected-row' : ''}">`;
-        html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}></td>`;
-        html += `<td><strong>${escola.nte || '-'}</strong></td>`;
-        html += `<td>${escola.municipio || '-'}</td>`;
-        html += `<td>${escola.codigoSec || '-'}</td>`;
-        html += `<td>${escola.codigoInep || '-'}</td>`;
-        html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}</td>`;
-        html += `</tr>`;
-    }
-    
-    html += '</tbody>';
-    html += '</table>';
-    html += '</div>';
-    container.innerHTML = html;
-    
-    // Adicionar eventos aos checkboxes
-    document.querySelectorAll('.school-checkbox').forEach(cb => {
-        cb.onchange = () => {
-            const codigo = cb.dataset.codigo;
-            const escola = escolasData.find(e => e.codigoSec === codigo);
-            if (cb.checked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) {
-                escolasSelecionadas.push(escola);
-            } else if (!cb.checked) {
-                escolasSelecionadas = escolasSelecionadas.filter(s => s.codigoSec !== codigo);
+            const container = document.getElementById('resultsTable');
+            document.getElementById('resultCount').innerHTML = resultados.length + ' registros';
+            
+            if (resultados.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>Nenhum resultado</p></div>';
+                return;
             }
-            // Atualizar a classe da linha
-            const row = cb.closest('tr');
-            if (row) {
-                if (cb.checked) row.classList.add('selected-row');
-                else row.classList.remove('selected-row');
+            
+            let html = '<div class="table-wrapper">';
+            html += '<table>';
+            html += '<thead>';
+            html += '<tr>';
+            html += '<th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox"></th>';
+            html += '<th>NTE</th>';
+            html += '<th>Município</th>';
+            html += '<th>Código SEC</th>';
+            html += '<th>Código INEP</th>';
+            html += '<th>Unidade Escolar</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            for (const escola of resultados) {
+                const isSelected = escolasSelecionadas.some(s => s.codigoSec === escola.codigoSec);
+                html += `<tr class="${isSelected ? 'selected-row' : ''}">`;
+                html += `<td class="checkbox-col"><input type="checkbox" class="school-checkbox" data-codigo="${escola.codigoSec}" ${isSelected ? 'checked' : ''}>`;
+                html += `<td><strong>${escola.nte || '-'}</strong>`;
+                html += `<td>${escola.municipio || '-'}`;
+                html += `<td>${escola.codigoSec || '-'}`;
+                html += `<td>${escola.codigoInep || '-'}`;
+                html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}`;
+                html += `</tr>`;
             }
-            renderGerarTabela();
-            atualizarCardsGerarValor();
-        };
-    });
-    
-    const selectAll = document.getElementById('selectAllCheckbox');
-    if (selectAll) {
-        selectAll.onchange = (e) => {
-            const isChecked = e.target.checked;
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            container.innerHTML = html;
+            
             document.querySelectorAll('.school-checkbox').forEach(cb => {
-                cb.checked = isChecked;
-                const codigo = cb.dataset.codigo;
-                const escola = escolasData.find(e => e.codigoSec === codigo);
-                if (isChecked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) {
-                    escolasSelecionadas.push(escola);
-                } else if (!isChecked) {
-                    escolasSelecionadas = [];
-                }
-                const row = cb.closest('tr');
-                if (row) {
-                    if (isChecked) row.classList.add('selected-row');
-                    else row.classList.remove('selected-row');
-                }
+                cb.onchange = () => {
+                    const codigo = cb.dataset.codigo;
+                    const escola = escolasData.find(e => e.codigoSec === codigo);
+                    if (cb.checked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) {
+                        escolasSelecionadas.push(escola);
+                    } else if (!cb.checked) {
+                        escolasSelecionadas = escolasSelecionadas.filter(s => s.codigoSec !== codigo);
+                    }
+                    const row = cb.closest('tr');
+                    if (row) {
+                        if (cb.checked) row.classList.add('selected-row');
+                        else row.classList.remove('selected-row');
+                    }
+                    renderGerarTabela();
+                    atualizarCardsGerarValor();
+                };
             });
-            renderGerarTabela();
-            atualizarCardsGerarValor();
-        };
-    }
-}
+            
+            const selectAll = document.getElementById('selectAllCheckbox');
+            if (selectAll) {
+                selectAll.onchange = (e) => {
+                    const isChecked = e.target.checked;
+                    document.querySelectorAll('.school-checkbox').forEach(cb => {
+                        cb.checked = isChecked;
+                        const codigo = cb.dataset.codigo;
+                        const escola = escolasData.find(e => e.codigoSec === codigo);
+                        if (isChecked && !escolasSelecionadas.some(s => s.codigoSec === codigo)) {
+                            escolasSelecionadas.push(escola);
+                        } else if (!isChecked) {
+                            escolasSelecionadas = [];
+                        }
+                        const row = cb.closest('tr');
+                        if (row) {
+                            if (isChecked) row.classList.add('selected-row');
+                            else row.classList.remove('selected-row');
+                        }
+                    });
+                    renderGerarTabela();
+                    atualizarCardsGerarValor();
+                };
+            }
+        }
         
         function exportarParaGerar() {
             if (escolasSelecionadas.length === 0) { alert('Selecione pelo menos uma escola'); return; }
@@ -662,35 +660,56 @@
         
         function renderGerarTabela() {
             const container = document.getElementById('gerarTabela');
-            document.getElementById('gerarCount').innerHTML = escolasSelecionadas.length + ' escolas';
-            if (escolasSelecionadas.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>Nenhuma escola selecionada</p></div>';
-                return;
+            document.getElementById('gerarCount').innerHTML = escolasSelecionadas.length + ' escola' + (escolasSelecionadas.length !== 1 ? 's' : '');
+            
+            if (escolasSelecionadas.length === 0) { 
+                container.innerHTML = '<div class="empty-state"><p>Nenhuma escola selecionada</p></div>'; 
+                return; 
             }
-            let html = '<div class="table-wrapper">\n<tr>\n<thead>';
-            html += '<tr style="background: #9ca3af;"><th>NTE</th><th>Município</th><th>Código SEC</th><th>Código INEP</th><th>Unidade Escolar</th>';
-            html += '<th colspan="4">FAED</th><th colspan="8">ALIMENTAÇÃO</th></tr>';
-            html += '<tr style="background: #6b7280;"><th></th><th></th><th></th><th></th><th></th>';
+            
+            let html = '<div class="table-wrapper">';
+            html += '<table>';
+            html += '<thead>';
+            html += '<tr style="background: #9ca3af;">';
+            html += '<th>NTE</th>';
+            html += '<th>Município</th>';
+            html += '<th>Código SEC</th>';
+            html += '<th>Código INEP</th>';
+            html += '<th>Unidade Escolar</th>';
+            html += '<th colspan="4">FAED</th>';
+            html += '<th colspan="8">ALIMENTAÇÃO</th>';
+            html += '</tr>';
+            html += '<tr style="background: #6b7280;">';
+            html += '<th></th><th></th><th></th><th></th><th></th>';
             html += '<th>2023</th><th>2024</th><th>2025</th><th>2026</th>';
-            html += '<th>Fed23</th><th>Est23</th><th>Fed24</th><th>Est24</th><th>Fed25</th><th>Est25</th><th>Fed26</th><th>Est26</th></tr>';
-            html += '</thead><tbody>';
+            html += '<th>Fed23</th><th>Est23</th><th>Fed24</th><th>Est24</th>';
+            html += '<th>Fed25</th><th>Est25</th><th>Fed26</th><th>Est26</th>';
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
             for (const escola of escolasSelecionadas) {
                 html += '<tr>';
-                html += `<td>${escola.nte || '-'}`;
-                html += `<td>${escola.municipio || '-'}`;
-                html += `<td>${escola.codigoSec || '-'}`;
-                html += `<td>${escola.codigoInep || '-'}`;
-                html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}`;
+                html += `<td>${escola.nte || '-'}</td>`;
+                html += `<td>${escola.municipio || '-'}</td>`;
+                html += `<td>${escola.codigoSec || '-'}</td>`;
+                html += `<td>${escola.codigoInep || '-'}</td>`;
+                html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}</td>`;
+                
                 for (let ano of [2023, 2024, 2025, 2026]) {
                     html += `<td class="valor-monetario">${formatarValorBR(valoresFAED[ano][escola.codigoSec] || 0)}`;
                 }
+                
                 for (let ano of [2023, 2024, 2025, 2026]) {
                     html += `<td class="valor-monetario">${formatarValorBR(valoresAlimentacao[ano].federal[escola.codigoSec] || 0)}`;
                     html += `<td class="valor-monetario">${formatarValorBR(valoresAlimentacao[ano].estadual[escola.codigoSec] || 0)}`;
                 }
-                html += `</tr>`;
+                html += '</tr>';
             }
-            html += '</tbody>...</div>';
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
             container.innerHTML = html;
         }
         
@@ -779,7 +798,6 @@
                 return;
             }
             
-            // Calcular totais GERAIS primeiro (para a linha TOTAL)
             let totalGeralFAED = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
             let totalGeralAlimFederal = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
             let totalGeralAlimEstadual = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
@@ -792,12 +810,9 @@
                 }
             }
             
-            // Separar por tipo para NTE e MUNICIPIO
             const itensNTE = resumoDados.filter(item => item.tipo === 'NTE');
             const itensMunicipio = resumoDados.filter(item => item.tipo === 'MUNICIPIO');
-            const outrosItens = resumoDados.filter(item => item.tipo !== 'NTE' && item.tipo !== 'MUNICIPIO');
             
-            // Calcular totais NTE
             let totalNTEFAED = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
             let totalNTEAlimFederal = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
             let totalNTEAlimEstadual = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
@@ -810,7 +825,6 @@
                 }
             }
             
-            // Calcular totais MUNICIPIO
             let totalMunFAED = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
             let totalMunAlimFederal = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
             let totalMunAlimEstadual = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
@@ -849,8 +863,8 @@
             html += '<th colspan="4" class="th-manutencao" style="background: #9ca3af;">MANUTENÇÃO</th>';
             html += '<th colspan="8" class="th-alimentacao" style="background: #fff3cd;">ALIMENTAÇÃO</th>';
             html += '<th rowspan="3" style="width: 50px;">Selecionar</th>';
-            html += '</tr>';
             html += '<tr>';
+            html += '<tr style="background: #6b7280;">';
             html += '<th rowspan="2" style="background: #9ca3af;">2023</th>';
             html += '<th rowspan="2" style="background: #9ca3af;">2024</th>';
             html += '<th rowspan="2" style="background: #9ca3af;">2025</th>';
@@ -860,7 +874,7 @@
             html += '<th colspan="2" style="background: #fff3cd;">2025</th>';
             html += '<th colspan="2" style="background: #fff3cd;">2026</th>';
             html += '</tr>';
-            html += '<tr>';
+            html += '<tr style="background: #6b7280;">';
             html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
             html += '<th style="background: #fff3cd;">Estadual - FAED</th>';
             html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
@@ -870,12 +884,12 @@
             html += '<th style="background: #fff3cd;">Federal - PNAE</th>';
             html += '<th style="background: #fff3cd;">Estadual - FAED</th>';
             html += '</tr>';
-            html += '</thead><tbody>';
+            html += '</thead>';
+            html += '<tbody>';
             
-            // Linhas NTE
             for (const item of itensNTE) {
                 html += '<tr>';
-                html += `<td style="text-align:left; font-weight:bold;">${item.identificador}`;
+                html += `<td style="text-align:left; font-weight:bold;">${item.identificador}</td>`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2023)}`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2024)}`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2025)}`;
@@ -888,10 +902,9 @@
                 html += '</tr>';
             }
             
-            // Linhas MUNICIPIO
             for (const item of itensMunicipio) {
                 html += '<tr>';
-                html += `<td style="text-align:left; font-weight:bold;">${item.identificador}`;
+                html += `<td style="text-align:left; font-weight:bold;">${item.identificador}</td>`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2023)}`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2024)}`;
                 html += `<td class="valor-monetario">${formatarValorBR(item.faed2025)}`;
@@ -904,7 +917,6 @@
                 html += '</tr>';
             }
             
-            // Linha TOTAL (soma de todos os itens)
             html += '<tr class="total-row">';
             html += '<td style="text-align:left;"><strong>TOTAL</strong>';
             html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralFAED[2023])}</strong>`;
@@ -918,7 +930,6 @@
             html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
-            // Linha com os textos NTE e MUNICIPIO acima dos valores totais
             html += '<tr style="background: #e5e7eb;">';
             html += '<td style="text-align:left;"><strong>&nbsp;</strong>';
             html += '<td colspan="1" style="text-align:center;"><strong>NTE</strong>';
@@ -927,7 +938,6 @@
             html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
-            // TOTAL GERAL MANUTENÇÃO
             html += '<tr class="total-geral" style="background: #d1d5db;">';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO</strong>';
             html += `<td class="valor-monetario"><strong>${formatarValorBR(totalNTEmanutencao)}</strong>`;
@@ -938,7 +948,6 @@
             html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
-            // TOTAL GERAL ALIMENTAÇÃO
             html += '<tr class="total-geral" style="background: #d1d5db;">';
             html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO</strong>';
             html += `<td class="valor-monetario"><strong>${formatarValorBR(totalNTEalimentacao)}</strong>`;
@@ -949,7 +958,9 @@
             html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
-            html += '</tbody>...</div>';
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
             container.innerHTML = html;
             
             document.querySelectorAll('.resumo-item-checkbox').forEach(cb => {
