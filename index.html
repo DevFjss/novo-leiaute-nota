@@ -742,49 +742,47 @@
         }
         
         async function enviarParaResumo() {
-            if (escolasSelecionadas.length === 0) {
-                alert('Selecione escolas primeiro');
-                return;
-            }
-            const totais = calcularTotaisEscolas(escolasSelecionadas);
-            
-            let identificador = '';
-            let tipoItem = '';
-            
-            if (tipoBuscaAtual === 'NTE') {
-                identificador = `NTE ${valorBuscaAtual}`;
-                tipoItem = 'NTE';
-            } else if (tipoBuscaAtual === 'MUNICIPIO') {
-                identificador = municipioExatoAtual ? municipioExatoAtual.toUpperCase() : valorBuscaAtual.toUpperCase();
-                tipoItem = 'MUNICIPIO';
-            } else if (tipoBuscaAtual === 'ESCOLA') {
-                identificador = valorBuscaAtual.toUpperCase();
-                tipoItem = 'ESCOLA';
-            } else {
-                if (escolasSelecionadas.length > 0) {
-                    const primeiraEscola = escolasSelecionadas[0];
-                    identificador = primeiraEscola.municipio ? primeiraEscola.municipio.toUpperCase() : `SELEÇÃO ${escolasSelecionadas.length} ESCOLAS`;
-                    tipoItem = 'MANUAL';
-                } else {
-                    identificador = 'SELEÇÃO MANUAL';
-                    tipoItem = 'MANUAL';
-                }
-            }
-            
-            const novoItem = {
-                id: nextId++,
-                identificador: identificador,
-                tipo: tipoItem,
-                faed2023: totais.faed[2023],
-                faed2024: totais.faed[2024],
-                faed2025: totais.faed[2025],
-                faed2026: totais.faed[2026],
-                alimentacao: totais.alimentacao
-            };
-            resumoDados.push(novoItem);
-            renderResumoConsolidado();
-            alert(`Dados de ${identificador} adicionados ao resumo!`);
+    if (escolasSelecionadas.length === 0) {
+        alert('Selecione escolas primeiro');
+        return;
+    }
+    
+    // ⬇️⬇️⬇️ NOVO CÓDIGO ADICIONADO ⬇️⬇️⬇️
+    // Agrupar escolas por município
+    const escolasPorMunicipio = {};
+    for (const escola of escolasSelecionadas) {
+        const municipio = escola.municipio;
+        if (!escolasPorMunicipio[municipio]) {
+            escolasPorMunicipio[municipio] = [];
         }
+        escolasPorMunicipio[municipio].push(escola);
+    }
+    // ⬆️⬆️⬆️ NOVO CÓDIGO ADICIONADO ⬆️⬆️⬆️
+    
+    // ⬇️⬇️⬇️ ALTERADO - Agora é um LOOP para cada município ⬇️⬇️⬇️
+    for (const [municipio, escolas] of Object.entries(escolasPorMunicipio)) {
+        const totais = calcularTotaisEscolas(escolas);  // ← SOMA SÓ AS ESCOLAS DESSE MUNICÍPIO
+        
+        let identificador = municipio.toUpperCase();  // ← USA O NOME DO MUNICÍPIO
+        let tipoItem = 'MUNICIPIO';
+        
+        const novoItem = {
+            id: nextId++,
+            identificador: identificador,
+            tipo: tipoItem,
+            faed2023: totais.faed[2023],
+            faed2024: totais.faed[2024],
+            faed2025: totais.faed[2025],
+            faed2026: totais.faed[2026],
+            alimentacao: totais.alimentacao
+        };
+        resumoDados.push(novoItem);  // ← ADICIONA UM ITEM POR MUNICÍPIO
+    }
+    // ⬆️⬆️⬆️ ALTERADO ⬆️⬆️⬆️
+    
+    renderResumoConsolidado();
+    alert(`Dados de ${Object.keys(escolasPorMunicipio).length} município(s) adicionados ao resumo!`);  // ← ALTERADO
+}
         
         function excluirResumoSelecionados() {
             const checkboxes = document.querySelectorAll('.resumo-item-checkbox:checked');
