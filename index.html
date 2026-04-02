@@ -534,32 +534,44 @@
                     tipoBuscaAtual = 'NTE';
                     valorBuscaAtual = termo;
                     municipioExatoAtual = '';
-                } else {
-                    const municipioExato = escolasData.filter(escola => normalizarTexto(escola.municipio) === termoNormalizado);
-                    if (municipioExato.length > 0) {
-                        resultados = municipioExato;
-                        tipoBuscaAtual = 'MUNICIPIO';
-                        valorBuscaAtual = termoNormalizado;
-                        municipioExatoAtual = municipioExato[0].municipio;
-                    } else {
-                        resultados = escolasData.filter(escola => {
-                            return normalizarTexto(escola.codigoSec).includes(termoNormalizado) ||
-                                   normalizarTexto(escola.codigoInep).includes(termoNormalizado) ||
-                                   normalizarTexto(escola.unidadeEscolar).includes(termoNormalizado);
-                        });
-                        if (resultados.length > 0) {
-                            tipoBuscaAtual = 'ESCOLA';
-                            valorBuscaAtual = termo;
-                            municipioExatoAtual = '';
-                        } else {
-                            resultados = [];
-                            tipoBuscaAtual = '';
-                            valorBuscaAtual = '';
-                            municipioExatoAtual = '';
-                        }
-                    }
-                }
+               } else {
+    // 1º Verificar se é MUNICÍPIO EXATO
+    const municipioExato = escolasData.filter(escola => normalizarTexto(escola.municipio) === termoNormalizado);
+    if (municipioExato.length > 0) {
+        resultados = municipioExato;
+        tipoBuscaAtual = 'MUNICIPIO';
+        valorBuscaAtual = termoNormalizado;
+        municipioExatoAtual = municipioExato[0].municipio;
+    } 
+    // 2º Verificar se é MUNICÍPIO PARCIAL (CONTÉM) - NOVO!
+    else {
+        const municipioParcial = escolasData.filter(escola => normalizarTexto(escola.municipio).includes(termoNormalizado));
+        if (municipioParcial.length > 0) {
+            resultados = municipioParcial;
+            tipoBuscaAtual = 'MUNICIPIO';
+            valorBuscaAtual = termoNormalizado;
+            municipioExatoAtual = '';
+        } 
+        // 3º Buscar por código ou nome da escola
+        else {
+            resultados = escolasData.filter(escola => {
+                return normalizarTexto(escola.codigoSec).includes(termoNormalizado) ||
+                       normalizarTexto(escola.codigoInep).includes(termoNormalizado) ||
+                       normalizarTexto(escola.unidadeEscolar).includes(termoNormalizado);
+            });
+            if (resultados.length > 0) {
+                tipoBuscaAtual = 'ESCOLA';
+                valorBuscaAtual = termo;
+                municipioExatoAtual = '';
+            } else {
+                resultados = [];
+                tipoBuscaAtual = '';
+                valorBuscaAtual = '';
+                municipioExatoAtual = '';
             }
+        }
+    }
+}
             mostrarResultados(resultados);
         }
         
