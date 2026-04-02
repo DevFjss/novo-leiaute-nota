@@ -529,6 +529,7 @@
             } else {
                 const termoNormalizado = normalizarTexto(termo);
                 
+                // Verificar se é NTE exato
                 const nteExato = escolasData.filter(escola => escola.nte === termo);
                 if (nteExato.length > 0) {
                     resultados = nteExato;
@@ -536,6 +537,7 @@
                     valorBuscaAtual = termo;
                     municipioExatoAtual = '';
                 } else {
+                    // Verificar se é MUNICÍPIO EXATO (comparação normalizada)
                     const municipioExato = escolasData.filter(escola => normalizarTexto(escola.municipio) === termoNormalizado);
                     if (municipioExato.length > 0) {
                         resultados = municipioExato;
@@ -543,6 +545,7 @@
                         valorBuscaAtual = termoNormalizado;
                         municipioExatoAtual = municipioExato[0].municipio;
                     } else {
+                        // Busca por Código SEC, Código INEP ou nome da escola (contém)
                         resultados = escolasData.filter(escola => {
                             return normalizarTexto(escola.codigoSec).includes(termoNormalizado) ||
                                    normalizarTexto(escola.codigoInep).includes(termoNormalizado) ||
@@ -686,9 +689,12 @@
             } else if (tipoBuscaAtual === 'MUNICIPIO') {
                 identificador = municipioExatoAtual ? municipioExatoAtual.toUpperCase() : valorBuscaAtual.toUpperCase();
                 itemTipo = 'MUNICIPIO';
+            } else if (tipoBuscaAtual === 'ESCOLA') {
+                identificador = `ESCOLA: ${valorBuscaAtual.toUpperCase()}`;
+                itemTipo = 'ESCOLA';
             } else {
-                identificador = 'OUTROS';
-                itemTipo = 'OUTROS';
+                identificador = 'SELEÇÃO MANUAL';
+                itemTipo = 'MANUAL';
             }
             
             const novoItem = {
@@ -736,6 +742,7 @@
             // Separar itens por tipo
             const itensNTE = resumoDados.filter(item => item.tipo === 'NTE');
             const itensMunicipio = resumoDados.filter(item => item.tipo === 'MUNICIPIO');
+            const outrosItens = resumoDados.filter(item => item.tipo !== 'NTE' && item.tipo !== 'MUNICIPIO');
             
             // Calcular totais para NTE
             let totalNTEFAED = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
@@ -763,6 +770,19 @@
                 }
             }
             
+            // Calcular totais gerais para os totais inferiores
+            let totalGeralFAED = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+            let totalGeralAlimFederal = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+            let totalGeralAlimEstadual = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+            
+            for (const item of resumoDados) {
+                for (let ano of [2023, 2024, 2025, 2026]) {
+                    totalGeralFAED[ano] += item['faed' + ano];
+                    totalGeralAlimFederal[ano] += item.alimentacao[ano].federal;
+                    totalGeralAlimEstadual[ano] += item.alimentacao[ano].estadual;
+                }
+            }
+            
             let totalNTEmanutencao = totalNTEFAED[2023] + totalNTEFAED[2024] + totalNTEFAED[2025] + totalNTEFAED[2026];
             let totalNTEalimentacao = 0;
             for (let ano of [2023, 2024, 2025, 2026]) {
@@ -773,6 +793,12 @@
             let totalMunalimentacao = 0;
             for (let ano of [2023, 2024, 2025, 2026]) {
                 totalMunalimentacao += totalMunAlimFederal[ano] + totalMunAlimEstadual[ano];
+            }
+            
+            let totalGeralManutencao = totalGeralFAED[2023] + totalGeralFAED[2024] + totalGeralFAED[2025] + totalGeralFAED[2026];
+            let totalGeralAlimentacao = 0;
+            for (let ano of [2023, 2024, 2025, 2026]) {
+                totalGeralAlimentacao += totalGeralAlimFederal[ano] + totalGeralAlimEstadual[ano];
             }
             
             let html = '<div class="table-wrapper">';
@@ -825,10 +851,10 @@
                 html += '</tr>';
             }
             
-            // Total NTE - MANUTENÇÃO
+            // Total NTE
             if (itensNTE.length > 0) {
                 html += '<tr class="total-row">';
-                html += `<td style="text-align:left;"><strong>TOTAL (NTE)</strong>`;
+                html += '<td style="text-align:left;"><strong>TOTAL (NTE)</strong>';
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalNTEFAED[2023])}</strong>`;
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalNTEFAED[2024])}</strong>`;
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalNTEFAED[2025])}</strong>`;
@@ -839,18 +865,15 @@
                 }
                 html += '<td class="resumo-checkbox-col">';
                 html += '</tr>';
-            }
-            
-            // TOTAL GERAL MANUTENÇÃO e ALIMENTAÇÃO - NTE
-            if (itensNTE.length > 0) {
+                
                 html += '<tr class="total-geral">';
-                html += `<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO (NTE)</strong>`;
+                html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO (NTE)</strong>';
                 html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalNTEmanutencao)}</strong>`;
                 html += '<td class="resumo-checkbox-col">';
                 html += '</tr>';
                 
                 html += '<tr class="total-geral">';
-                html += `<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO (NTE)</strong>`;
+                html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO (NTE)</strong>';
                 html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalNTEalimentacao)}</strong>`;
                 html += '<td class="resumo-checkbox-col">';
                 html += '</tr>';
@@ -872,10 +895,10 @@
                 html += '</tr>';
             }
             
-            // Total MUNICIPIO - MANUTENÇÃO
+            // Total MUNICIPIO
             if (itensMunicipio.length > 0) {
                 html += '<tr class="total-row">';
-                html += `<td style="text-align:left;"><strong>TOTAL (MUNICÍPIO)</strong>`;
+                html += '<td style="text-align:left;"><strong>TOTAL (MUNICÍPIO)</strong>';
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalMunFAED[2023])}</strong>`;
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalMunFAED[2024])}</strong>`;
                 html += `<td class="valor-monetario"><strong>${formatarValorBR(totalMunFAED[2025])}</strong>`;
@@ -886,22 +909,48 @@
                 }
                 html += '<td class="resumo-checkbox-col">';
                 html += '</tr>';
-            }
-            
-            // TOTAL GERAL MANUTENÇÃO e ALIMENTAÇÃO - MUNICIPIO
-            if (itensMunicipio.length > 0) {
+                
                 html += '<tr class="total-geral">';
-                html += `<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO (MUNICÍPIO)</strong>`;
+                html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO (MUNICÍPIO)</strong>';
                 html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalMunmanutencao)}</strong>`;
                 html += '<td class="resumo-checkbox-col">';
                 html += '</tr>';
                 
                 html += '<tr class="total-geral">';
-                html += `<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO (MUNICÍPIO)</strong>`;
+                html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO (MUNICÍPIO)</strong>';
                 html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalMunalimentacao)}</strong>`;
                 html += '<td class="resumo-checkbox-col">';
                 html += '</tr>';
             }
+            
+            // Linhas OUTROS
+            for (const item of outrosItens) {
+                html += '<tr>';
+                html += `<td style="text-align:left; font-weight:bold;">${item.identificador}`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2023)}`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2024)}`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2025)}`;
+                html += `<td class="valor-monetario">${formatarValorBR(item.faed2026)}`;
+                for (let ano of [2023, 2024, 2025, 2026]) {
+                    html += `<td class="valor-monetario">${formatarValorBR(item.alimentacao[ano].federal)}`;
+                    html += `<td class="valor-monetario">${formatarValorBR(item.alimentacao[ano].estadual)}`;
+                }
+                html += `<td class="resumo-checkbox-col"><input type="checkbox" class="resumo-item-checkbox" value="${item.id}">`;
+                html += '</tr>';
+            }
+            
+            // Total GERAL FINAL
+            html += '<tr class="total-geral" style="background: #d1d5db;">';
+            html += '<td style="text-align:left;"><strong>TOTAL GERAL MANUTENÇÃO (TODOS)</strong>';
+            html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralManutencao)}</strong>`;
+            html += '<td class="resumo-checkbox-col">';
+            html += '</tr>';
+            
+            html += '<tr class="total-geral" style="background: #d1d5db;">';
+            html += '<td style="text-align:left;"><strong>TOTAL GERAL ALIMENTAÇÃO (TODOS)</strong>';
+            html += `<td colspan="12" class="valor-monetario"><strong>${formatarValorBR(totalGeralAlimentacao)}</strong>`;
+            html += '<td class="resumo-checkbox-col">';
+            html += '</tr>';
             
             html += '</tbody></table></div>';
             container.innerHTML = html;
