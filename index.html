@@ -570,7 +570,7 @@
                 container.innerHTML = '<div class="empty-state"><p>Nenhum resultado</p></div>';
                 return;
             }
-            let html = '<div class="table-wrapper">\n<table>\n<thead>\n<tr>';
+            let html = '<div class="table-wrapper">\n<tr>\n<thead>\n<tr>';
             html += '<th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox"></th>';
             html += '<th>NTE</th><th>Município</th><th>Código SEC</th><th>Código INEP</th><th>Unidade Escolar</th>';
             html += '</tr></thead><tbody>';
@@ -585,7 +585,7 @@
                 html += `<td style="text-align:left">${escola.unidadeEscolar || '-'}`;
                 html += `</tr>`;
             }
-            html += '</tbody></table></div>';
+            html += '</tbody>...</div>';
             container.innerHTML = html;
             
             document.querySelectorAll('.school-checkbox').forEach(cb => {
@@ -630,7 +630,7 @@
                 container.innerHTML = '<div class="empty-state"><p>Nenhuma escola selecionada</p></div>';
                 return;
             }
-            let html = '<div class="table-wrapper">\n<table>\n<thead>';
+            let html = '<div class="table-wrapper">\n<tr>\n<thead>';
             html += '<tr style="background: #9ca3af;"><th>NTE</th><th>Município</th><th>Código SEC</th><th>Código INEP</th><th>Unidade Escolar</th>';
             html += '<th colspan="4">FAED</th><th colspan="8">ALIMENTAÇÃO</th></tr>';
             html += '<tr style="background: #6b7280;"><th></th><th></th><th></th><th></th><th></th>';
@@ -653,7 +653,7 @@
                 }
                 html += `</tr>`;
             }
-            html += '</tbody></table></div>';
+            html += '</tbody>...</div>';
             container.innerHTML = html;
         }
         
@@ -690,7 +690,6 @@
                 identificador = valorBuscaAtual.toUpperCase();
                 tipoItem = 'ESCOLA';
             } else {
-                // Seleção manual - pegar o primeiro município ou NTE da seleção
                 if (escolasSelecionadas.length > 0) {
                     const primeiraEscola = escolasSelecionadas[0];
                     identificador = primeiraEscola.municipio ? primeiraEscola.municipio.toUpperCase() : `SELEÇÃO ${escolasSelecionadas.length} ESCOLAS`;
@@ -743,7 +742,20 @@
                 return;
             }
             
-            // Separar por tipo para mostrar NTE e MUNICIPIO separados
+            // Calcular totais GERAIS primeiro (para a linha TOTAL)
+            let totalGeralFAED = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+            let totalGeralAlimFederal = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+            let totalGeralAlimEstadual = { 2023: 0, 2024: 0, 2025: 0, 2026: 0 };
+            
+            for (const item of resumoDados) {
+                for (let ano of [2023, 2024, 2025, 2026]) {
+                    totalGeralFAED[ano] += item['faed' + ano];
+                    totalGeralAlimFederal[ano] += item.alimentacao[ano].federal;
+                    totalGeralAlimEstadual[ano] += item.alimentacao[ano].estadual;
+                }
+            }
+            
+            // Separar por tipo para NTE e MUNICIPIO
             const itensNTE = resumoDados.filter(item => item.tipo === 'NTE');
             const itensMunicipio = resumoDados.filter(item => item.tipo === 'MUNICIPIO');
             const outrosItens = resumoDados.filter(item => item.tipo !== 'NTE' && item.tipo !== 'MUNICIPIO');
@@ -772,6 +784,12 @@
                     totalMunAlimFederal[ano] += item.alimentacao[ano].federal;
                     totalMunAlimEstadual[ano] += item.alimentacao[ano].estadual;
                 }
+            }
+            
+            let totalGeralManutencao = totalGeralFAED[2023] + totalGeralFAED[2024] + totalGeralFAED[2025] + totalGeralFAED[2026];
+            let totalGeralAlimentacao = 0;
+            for (let ano of [2023, 2024, 2025, 2026]) {
+                totalGeralAlimentacao += totalGeralAlimFederal[ano] + totalGeralAlimEstadual[ano];
             }
             
             let totalNTEmanutencao = totalNTEFAED[2023] + totalNTEFAED[2024] + totalNTEFAED[2025] + totalNTEFAED[2026];
@@ -849,6 +867,20 @@
                 html += '</tr>';
             }
             
+            // Linha TOTAL (soma de todos os itens)
+            html += '<tr class="total-row">';
+            html += '<td style="text-align:left;"><strong>TOTAL</strong>';
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralFAED[2023])}</strong>`;
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralFAED[2024])}</strong>`;
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralFAED[2025])}</strong>`;
+            html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralFAED[2026])}</strong>`;
+            for (let ano of [2023, 2024, 2025, 2026]) {
+                html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralAlimFederal[ano])}</strong>`;
+                html += `<td class="valor-monetario"><strong>${formatarValorBR(totalGeralAlimEstadual[ano])}</strong>`;
+            }
+            html += '<td class="resumo-checkbox-col">';
+            html += '</tr>';
+            
             // Linha com os textos NTE e MUNICIPIO acima dos valores totais
             html += '<tr style="background: #e5e7eb;">';
             html += '<td style="text-align:left;"><strong>&nbsp;</strong>';
@@ -880,7 +912,7 @@
             html += '<td class="resumo-checkbox-col">';
             html += '</tr>';
             
-            html += '</tbody></table></div>';
+            html += '</tbody>...</div>';
             container.innerHTML = html;
             
             document.querySelectorAll('.resumo-item-checkbox').forEach(cb => {
